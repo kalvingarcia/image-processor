@@ -1,17 +1,34 @@
-﻿<!DOCTYPE html>
+<html>
+    <head>
+    </head>
 
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="utf-8" />
-    <title>3444 Project</title>
-    <link rel = "stylesheet" href = "stylesheet.css">
-</head>
-<body>
-    <input type = "file" id = "imgUp" accept = "image/png, image/jpg">
-    <div class = border id = border>
-        <canvas id = "tutorial" class = "tutorial"></canvas>
-    </div>
-    
-    <script src = "Script.js"> </script>
-</body>
+    <body>
+        <canvas width="400" height="300" id="canvas1" style="border: 1px solid blue; display:block">sorry, no canvas, please, upgrade your browser</canvas>
+        <div>
+            Select an image to work with: <input type="file" name="pic" onchange="loadImage(this.files[0])" accept="image/*">
+        </div>
+        <div>
+            <button onclick="liquifyToggle()">Liquify Tool</button>
+
+            <button onclick="swirlToggle()">Swirl Tool</button>
+            Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" />
+            <span id="intensity">40</span>
+
+            <button onclick="colorPickToggle()">Color Pick</button>
+        </div>
+        Selected Color: <div align="center" class="color-cell" id="selected-color"></div>
+        <div class = filterSliders id = "filterSliders">
+            Red: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "redS" onchange = "document.getElementById('red').innerHTML = this.value;">
+            <span id="red">0</span>
+            Green: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "greenS" onchange = "document.getElementById('green').innerHTML = this.value;">
+            <span id="green">0</span>
+            Blue: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "blueS" onchange = "document.getElementById('blue').innerHTML = this.value;">
+            <span id="blue">0</span>
+            Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opS" onchange = "document.getElementById('opacity').innerHTML = this.value;">
+            <span id="opacity">0</span>
+     
+            <button type = "button" id = "filter" onclick = "colorFilter();">Filter</button>
+        </div>
+      <script src="image-proc.js"></script>
+    </body>
 </html>
