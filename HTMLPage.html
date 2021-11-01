@@ -5,7 +5,7 @@
     <body>
         <canvas width="400" height="300" id="canvas1" style="border: 1px solid blue; display:block">sorry, no canvas, please, upgrade your browser</canvas>
         <div>
-            Select an image to work with: <input type="file" name="pic" onchange="loadImage(this.files[0])" accept="image/*">
+            Select an image to work with: <input type="file" name="pic" onclick="this.value=null;" onchange="loadImage(this.files[0])" accept="image/*">
         </div>
         <div>
             <button onclick="liquifyToggle()">Liquify Tool</button>
