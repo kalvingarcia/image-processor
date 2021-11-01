@@ -93,13 +93,15 @@ function onMouseWheel(event) {
     }
 
     if (event.wheelDelta) { //change in mousewheel (for chrome)
+        console.log(event.wheelDelta);    
         switch (event.wheelDelta) {
+            
 					//add size depending on speed
-            case  120: toolRadious += 1; break;
-            case  240: toolRadious += 2; break;
+            case  150: toolRadious += 1; break;
+            //case  240: toolRadious += 2; break;
 					//remove size depending on speed
-            case -120: toolRadious -= 1; break;
-            case -240: toolRadious -= 2; break;
+            case -150: toolRadious -= 1; break;
+            //case -240: toolRadious -= 2; break;
         }
     } else if (event.detail) { //for other browser
         if (event.detail < 0) {
