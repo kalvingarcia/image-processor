@@ -95,7 +95,6 @@ function onMouseWheel(event) {
     if (event.wheelDelta) { //change in mousewheel (for chrome)
         console.log(event.wheelDelta);    
         switch (event.wheelDelta) {
-            
 					//add size depending on speed
             case  150: toolRadious += 1; break;
             //case  240: toolRadious += 2; break;
@@ -126,7 +125,7 @@ function onMouseMove(event) {
     if (!currentBuffer) { //no value, exit
         return;
     }
-    if(doColorPick) { //checking if we are in color pick mode
+    if(toolID == 3) { //checking if we are in color pick mode
 			//if we are we have to update the hovered color
 			//we also need to draw the tool
       drawTool(event.clientX, event.clientY, pick(event));
@@ -150,7 +149,24 @@ function onMouseDown(event) {
 			I think this could be optimized by using an array of bools
 			we'd need to know how many tools we have for that though
 		*/
-    if(doLiquify && !doSwirl && !doColorPick) {
+    switch(toolID) {
+        case 0:
+            break;
+        case 1:
+            swirl(currentBuffer, x, y, toolRadious);
+            break;
+        case 2: 
+            liquify(currentBuffer, x, y, toolRadious);
+            break;
+        case 3:
+            var picked = pick(event);
+            pickedColor.style.background = picked;
+            pickedColor.textContent = picked;
+            break;
+        default:
+            system.log("ERROR: toolID has invalid value.");
+    }
+    /*if(doLiquify && !doSwirl && !doColorPick) {
       liquify(currentBuffer, x, y, toolRadious);
     } else if(!doLiquify && doSwirl && !doColorPick) {
       swirl(currentBuffer, x, y, toolRadious);
@@ -158,7 +174,7 @@ function onMouseDown(event) {
       var picked = pick(event);
       pickedColor.style.background = picked;
       pickedColor.textContent = picked;
-    }
+    }*/
     drawBuffer(); //upadte the image
 }
 
@@ -177,7 +193,7 @@ function drawTool(clientX, clientY, hovered) {
 
     drawBuffer(); //we update the image
 
-    if(doLiquify || doSwirl) { //if we are not color picking
+    if(toolID != 3) { //if we are not color picking
 			//we draw a circle centered on the mouse
 			context2d.beginPath();
       context2d.arc(x, y, toolRadious, 0, 2 * Math.PI, false);
@@ -185,7 +201,7 @@ function drawTool(clientX, clientY, hovered) {
       context2d.strokeStyle = '#0000fa';
       context2d.closePath();
       context2d.stroke();
-    } else if(doColorPick) { //if we are color picking
+    } else { //if we are color picking
 			//we draw an offset circle with a larger stroke and filled with the color hovered
 			context2d.beginPath();
       context2d.arc(x + 20, y - 20, 20, 0, 2 * Math.PI, false);
@@ -461,28 +477,46 @@ function pick(event) {
 	they are called by their respective buttons in the html file
 */
 function colorPickToggle() {
-	if(!doColorPick) {
+/*	if(!doColorPick) {
     doLiquify = false;
     doSwirl = false;
 		doColorPick = true;
   } else if(doColorPick)
-		doColorPick = false;
+		doColorPick = false; */
+    if(toolID != 3) {
+        toolID = 3;
+    }
+    else {
+        toolID = 0;
+    }
 }
 function liquifyToggle() {
-  if(!doLiquify) {
+/*  if(!doLiquify) {
     doLiquify = true;
     doSwirl = false;
     doColorPick = false;
   } else if(doLiquify)
-    doLiquify = false;
+    doLiquify = false; */
+    if(toolID != 2) {
+        toolID = 2;
+    }
+    else {
+        toolID = 0;
+    }
 }
 function swirlToggle() {
-  if(!doSwirl) {
+/*  if(!doSwirl) {
     doLiquify = false;
     doSwirl = true;
     doColorPick = false;
   } else if(doSwirl)
-    doSwirl = false;
+    doSwirl = false; */
+    if(toolID != 1) {
+        toolID = 1;
+    }
+    else {
+        toolID = 0;
+    }
 }
 
 /*
@@ -538,7 +572,8 @@ const MAX_TOOL_RADIOUS = 80; //setting the max tool size
 */
 var pickedColor = document.getElementById('selected-color');
 //these are the tool bools
-var doSwirl = false, doLiquify = false, doColorPick = false;
+var toolID = 0; //no tool = 0, swirl = 1, liquify = 2, colorPick = 3, further tools could be added on this way
+//var doSwirl = false, doLiquify = false, doColorPick = false;
 
 setEffectIntensity(40); //this is the default effectIntensity
 
