@@ -473,51 +473,14 @@ function pick(event) {
 
 /*
 	These next few functions just toggle the tools
-
-	they are called by their respective buttons in the html file
+    If the selected tool is current active (toolID is equal to the ID of the tool we are toggling) turn it off, and set tool to none (toolID = 0)
+    (none == 0, swirl == 1, liquify == 2, clor pick ==2)
+    If tthe selected tool is equal to anything else, switch to the new tool. (set toolID to the ID of the tool we are toggling)
+	These are called by their respective buttons in the html file
 */
-function colorPickToggle() {
-/*	if(!doColorPick) {
-    doLiquify = false;
-    doSwirl = false;
-		doColorPick = true;
-  } else if(doColorPick)
-		doColorPick = false; */
-    if(toolID != 3) {
-        toolID = 3;
-    }
-    else {
-        toolID = 0;
-    }
-}
-function liquifyToggle() {
-/*  if(!doLiquify) {
-    doLiquify = true;
-    doSwirl = false;
-    doColorPick = false;
-  } else if(doLiquify)
-    doLiquify = false; */
-    if(toolID != 2) {
-        toolID = 2;
-    }
-    else {
-        toolID = 0;
-    }
-}
-function swirlToggle() {
-/*  if(!doSwirl) {
-    doLiquify = false;
-    doSwirl = true;
-    doColorPick = false;
-  } else if(doSwirl)
-    doSwirl = false; */
-    if(toolID != 1) {
-        toolID = 1;
-    }
-    else {
-        toolID = 0;
-    }
-}
+function swirlToggle() { toolID = toolID == 1 ? 0 : 1; }
+function liquifyToggle() { toolID = toolID == 2 ? 0 : 2; }
+function colorPickToggle() { toolID = toolID == 3 ? 0 : 3; }
 
 /*
 	this function just returns a random string containg a path to an image file
