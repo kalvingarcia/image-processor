@@ -8,13 +8,12 @@
             Select an image to work with: <input type="file" name="pic" onclick="this.value=null;" onchange="loadImage(this.files[0])" accept="image/*">
         </div>
         <div>
-            <button onclick="liquifyToggle()">Liquify Tool</button>
-
-            <button onclick="swirlToggle()">Swirl Tool</button>
+            <button onclick="toggleTool(2)">Liquify Tool</button>
+            <button onclick="toggleTool(1)">Swirl Tool</button>
             Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" />
             <span id="intensity">40</span>
 
-            <button onclick="colorPickToggle()">Color Pick</button>
+            <button onclick="toggleTool(3)">Color Pick</button>
         </div>
         Selected Color: <div align="center" class="color-cell" id="selected-color"></div>
         <div class = filterSliders id = "filterSliders">
