@@ -53,6 +53,7 @@ function loadImage(src){
   //prevent any non-image file type from being read.
   if(!src.type.match(/image.*/)){
     console.log("The dropped file is not an image: ", src.type); //output to the console (inspect element)
+	  scr.value = "";
     return;
   }
 
