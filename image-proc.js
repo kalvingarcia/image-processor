@@ -71,6 +71,10 @@ function loadImage(src){
             context2d.drawImage(image, 0, 0);
             currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
       }
+	image.onerror = function() {
+		alert('Invalid image');
+		console.log("The dropped file is not an image");
+	};
       image.src = e.target.result;
   };
   reader.readAsDataURL(src);
