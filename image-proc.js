@@ -60,23 +60,25 @@ function loadImage(src){
   //create our FileReader and run the results through the render function.
   var reader = new FileReader();
   reader.onload = function(e) {
-      var image = new Image();
-			//similar concept to the onload function
-      image.onload = function() {
-            // Adjust canvas size to the image dimensions
-            canvas.width = image.width;
-            canvas.height = image.height;
+    var image = new Image();
+		//similar concept to the onload function
+    image.onload = function() {
+          // Adjust canvas size to the image dimensions
+          canvas.width = image.width;
+          canvas.height = image.height;
 
-            //save a copy of loaded pixels
-            context2d.drawImage(image, 0, 0);
-            currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
-      }
-	image.onerror = function() {
-		alert('Invalid image');
-		console.log("The dropped file is not an image");
-	};
-      image.src = e.target.result;
+          //save a copy of loaded pixels
+          context2d.drawImage(image, 0, 0);
+          currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
+    }
+  	image.onerror = function() {
+  		alert('Invalid image');
+  		console.log("The dropped file is not an image");
+  	};
+
+    image.src = e.target.result;
   };
+
   reader.readAsDataURL(src);
 }
 
@@ -98,7 +100,7 @@ function onMouseWheel(event) {
     }
 
     if (event.wheelDelta) { //change in mousewheel (for chrome)
-        console.log(event.wheelDelta);    
+        console.log(event.wheelDelta);
         switch (event.wheelDelta) {
 					//add size depending on speed
             case  150: toolRadious += 1; break;
@@ -160,7 +162,7 @@ function onMouseDown(event) {
         case 1:
             swirl(currentBuffer, x, y, toolRadious);
             break;
-        case 2: 
+        case 2:
             liquify(currentBuffer, x, y, toolRadious);
             break;
         case 3:
