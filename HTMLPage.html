@@ -1,7 +1,6 @@
 <!-- Uses repurposed code from https://www.w3schools.com/html/html_responsive.asp in order to make window responsive.-->
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 * {
   box-sizing: border-box;
@@ -14,75 +13,62 @@
 }
 
 .menu a {
-  background-color: #e5e5e5;
+  background-color: #4d4d4d;
   padding: 8px;
   margin-top: 7px;
   display: block;
   width: 100%;
-  color: black;
+  color: #aaaaaa;
 }
 
 .main {
   float: left;
+  margin-top: 7px;
   width: 60%;
   padding: 0 20px;
 }
 
-.right {
-  background-color: #e5e5e5;
-  float: left;
-  width: 20%;
-  padding: 15px;
-  margin-top: 7px;
-  text-align: center;
-}
-
-@media only screen and (max-width: 620px) {
-  /* For mobile phones: */
-  .menu, .main, .right {
-    width: 100%;
-  }
-}
 </style>
 </head>
-<body style="font-family:Helvetica;color:#aaaaaa;">
+<body style="font-family:Helvetica;color:#aaaaaa;background-color:#000000">
 
-<div style="background-color:#e5e5e5;padding:15px;text-align:center;">
-  <h1>Welcome to the Image Editor!</h1>
+<div style="background-color:#4d4d4d;padding:3px;text-align:center;">
+  <h1>Welcome to Team the Team's Image Editor!</h1>
 </div>
 
 <div style="overflow:auto">
   <div class="menu">
     <div class = filterSliders id = "filterSliders">
-      <a>Red: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "redS" onchange = "document.getElementById('red').innerHTML = this.value;">
+      <a><h2>Filter Sliders</h2></a>
+      <a style="color:#ff0000">Red: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "redS" onchange = "document.getElementById('red').innerHTML = this.value;">
       <span id="red">0</span></a>
-      <a>Green: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "greenS" onchange = "document.getElementById('green').innerHTML = this.value;">
+      <a style="color:#00ff00">Green: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "greenS" onchange = "document.getElementById('green').innerHTML = this.value;">
       <span id="green">0</span></a>
-      <a>Blue: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "blueS" onchange = "document.getElementById('blue').innerHTML = this.value;">
+      <a style="color:#0000ff">Blue: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "blueS" onchange = "document.getElementById('blue').innerHTML = this.value;">
       <span id="blue">0</span></a>
-      <a>Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opS" onchange = "document.getElementById('opacity').innerHTML = this.value;">
+      <a style="color:#aaaaaa">Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opS" onchange = "document.getElementById('opacity').innerHTML = this.value;">
       <span id="opacity">0</span>
       <button type = "button" id = "filter" onclick = "colorFilter();">Filter</button></a>
+      Select your color with the sliders, then intensity and press "Filter."
     </div>
   </div>
-
   <div class="main">
     <canvas width="400" height="300" id="canvas1" style="border: 1px solid blue; display:block; margin-left: auto; margin-right: auto;">sorry, no canvas, please, upgrade your browser</canvas>
     Select an image to work with: <input type="file" name="pic" onclick="this.value=null;" onchange="loadImage(this.files[0])" accept="image/*">
   </div>
   
-
-  <div class="right">
-    <h2>Tools</h2>
-    <button onclick="toggleTool(2)">Liquify Tool</button><br>
-    <button onclick="toggleTool(1)">Swirl Tool</button><br>
-    Swirl Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br>
-    <button onclick="toggleTool(3)">Color Pick</button><br>
-    Selected Color: <div align="center" class="color-cell" id="selected-color"></div>
+  <div class="menu">
+    <a><h2>Tools</h2></a>
+    <a><button onclick="toggleTool(2)">Liquify Tool</button><br></a>
+    <a><button onclick="toggleTool(1)">Swirl Tool</button><br>
+    Swirl Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br></a>
+    <a><button onclick="toggleTool(3)">Color Pick</button><br>
+    Selected Color: <div align="center" class="color-cell" id="selected-color"></a></div>
   </div>
+  <div style="text-align: center">Select your tool by clicking on it, then click the picture to apply the tool.</div>
 </div>
 
-<div style="background-color:#e5e5e5;text-align:center;padding:10px;margin-top:7px;">made by Team the Team</div>
+<div style="background-color:#4d4d4d;text-align:center;padding:10px;margin-top:7px;">made by Team the Team</div>
 
 <script src="image-proc.js"></script>
 </body>
