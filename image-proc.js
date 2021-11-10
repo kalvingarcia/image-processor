@@ -9,7 +9,12 @@
 							https://geekofficedog.blogspot.com/2013/04/hello-swirl-swirl-effect-tutorial-in.html?m=1
 		mozilla.org (their pixel manip tutorial)
 			link - https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas
-        stackoverflow
+        ie.nitk.ac.in (for brightness and conrast algorithms)
+            link - https://ie.nitk.ac.in/blog/2020/01/19/algorithms-for-adjusting-brightness-and-contrast-of-an-image/
+        tannerhelland.com (for warmth)
+            link - https://tannerhelland.com/2014/07/01/simple-algorithms-adjusting-image-temperature-tint.html
+        alienryderflex.com (for saturation)
+            link - http://alienryderflex.com/saturation.html
 */
 
 //    This function downloads the current image.
@@ -532,11 +537,11 @@ function randomPreset() {
     this function is called when the the filter button is pressed
     It uses input from the four sliders next to the button to apply a filter.
 */
-function colorFilter() {
-    var red = document.getElementById('redS').value;
-    var green = document.getElementById('greenS').value;
-    var blue = document.getElementById('blueS').value;
-    var opacity = document.getElementById('opS').value / 100.0;
+function tint() {
+    var red = parseInt(document.getElementById('redS').value);
+    var green = parseInt(document.getElementById('greenS').value);
+    var blue = parseInt(document.getElementById('blueS').value);
+    var opacity = parseInt(document.getElementById('opS').value) / 100.0;
 
     var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
@@ -544,6 +549,65 @@ function colorFilter() {
 		data[i] = opacity * red + (1 - opacity) * data[i];
 		data[i + 1] = opacity * green + (1 - opacity) * data[i + 1];
 		data[i + 2] = opacity * blue + (1 - opacity) * data[i + 2];
+	}
+    currentBuffer = imageData;
+    drawBuffer();
+}
+
+function truncate(input) {
+    if(input < 0) {return 0;}
+    if(input > 255) {return 255;}
+    return input;
+}
+
+function brightness() {
+    var brightness = parseInt(document.getElementById('briS').value);
+    var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (var i = 0; i < data.length; i += 4) {
+		data[i] = truncate(data[i] + 1 + brightness);
+	    data[i + 1] = truncate(data[i + 1] + 1 + brightness);
+        data[i + 2] = truncate(data[i + 2] + 1 + brightness);
+	}
+    currentBuffer = imageData;
+    drawBuffer();
+}
+
+function contrast() {
+    var contrast = parseInt(document.getElementById('conS').value);
+    contrast = (259 * (255 + contrast)) / (255 * (259 - contrast));
+    var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (var i = 0; i < data.length; i += 4) {
+		data[i] = truncate(contrast * (data[i] - 128) + 128);
+	    data[i + 1] = truncate(contrast * (data[i + 1] - 128) + 128);
+        data[i + 2] = truncate(contrast * (data[i + 2] - 128) + 128);
+	}
+    currentBuffer = imageData;
+    drawBuffer();
+}
+
+function warmth() {
+    var warmth = parseInt(document.getElementById('warS').value);
+    var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (var i = 0; i < data.length; i += 4) {
+		data[i] = truncate(data[i] + warmth);
+        data[i + 2] = truncate(data[i + 2] - warmth);
+	}
+    currentBuffer = imageData;
+    drawBuffer();
+}
+
+function saturation() {
+    var saturation = parseInt(document.getElementById('satS').value) / 10;
+    var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (var i = 0; i < data.length; i += 4) {
+        var P = Math.sqrt(data[i] * data[i] * .299 + data[i + 1] * data[i + 1] * .587 + data[i + 2] * data[i + 2] * .114);
+		data[i] = P + (data[i] - P) * saturation;
+	    data[i + 1] = P + (data[i + 1] - P) * saturation;
+        data[i + 2] = P + (data[i + 2] - P) * saturation;
 	}
     currentBuffer = imageData;
     drawBuffer();
