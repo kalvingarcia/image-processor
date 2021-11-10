@@ -537,7 +537,7 @@ function randomPreset() {
     this function is called when the the filter button is pressed
     It uses input from the four sliders next to the button to apply a filter.
 */
-function tint() {
+function colorFilter() {
     var red = parseInt(document.getElementById('redS').value);
     var green = parseInt(document.getElementById('greenS').value);
     var blue = parseInt(document.getElementById('blueS').value);
@@ -554,25 +554,32 @@ function tint() {
     drawBuffer();
 }
 
+//for color values. If a color value would go out of bounds, it instead hits a min of 0 or max of 255
 function truncate(input) {
     if(input < 0) {return 0;}
     if(input > 255) {return 255;}
     return input;
 }
 
+//called from brightness button, brightness val is controlled by briS slider
+//adds some constant brightness to r,g,b values.
+//from - https://ie.nitk.ac.in/blog/2020/01/19/algorithms-for-adjusting-brightness-and-contrast-of-an-image/
 function brightness() {
     var brightness = parseInt(document.getElementById('briS').value);
     var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     for (var i = 0; i < data.length; i += 4) {
-		data[i] = truncate(data[i] + 1 + brightness);
-	    data[i + 1] = truncate(data[i + 1] + 1 + brightness);
-        data[i + 2] = truncate(data[i + 2] + 1 + brightness);
+		data[i] = truncate(data[i] +  brightness);
+	    data[i + 1] = truncate(data[i + 1] + brightness);
+        data[i + 2] = truncate(data[i + 2] + brightness);
 	}
     currentBuffer = imageData;
     drawBuffer();
 }
 
+//called from contrast button, contrast val is controlled by conS slider
+//modifies r, g, and b values with given contrast value. positive values increase contrast, negatives decrease contrast.
+//from - https://ie.nitk.ac.in/blog/2020/01/19/algorithms-for-adjusting-brightness-and-contrast-of-an-image/
 function contrast() {
     var contrast = parseInt(document.getElementById('conS').value);
     contrast = (259 * (255 + contrast)) / (255 * (259 - contrast));
@@ -587,6 +594,9 @@ function contrast() {
     drawBuffer();
 }
 
+//called from warmth button, warmth val is controlled by warS slider
+//increases r and decreases b by 'warmth' value. Positives values warm image, negative cool image
+//from - https://tannerhelland.com/2014/07/01/simple-algorithms-adjusting-image-temperature-tint.html
 function warmth() {
     var warmth = parseInt(document.getElementById('warS').value);
     var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
@@ -599,6 +609,23 @@ function warmth() {
     drawBuffer();
 }
 
+//called from tint button, tint val is controlled by tinS slider
+//increases g by tint value. Positives values tint (green), negative values de-tint (megenta)
+//from - https://tannerhelland.com/2014/07/01/simple-algorithms-adjusting-image-temperature-tint.html
+function tint() {
+    var tint = parseInt(document.getElementById('tinS').value);
+    var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    for (var i = 0; i < data.length; i += 4) {
+		data[i + 1] = truncate(data[i + 1] + tint);
+	}
+    currentBuffer = imageData;
+    drawBuffer();
+}
+
+//called by saturation button, saturation val is controlled by satS slider
+//modifies r,g,b values with given saturation value. 0 is greyscale, 1 is no change, 2 is double contrast
+//from - http://alienryderflex.com/saturation.html
 function saturation() {
     var saturation = parseInt(document.getElementById('satS').value) / 10;
     var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);

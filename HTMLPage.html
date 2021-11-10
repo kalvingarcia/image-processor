@@ -39,8 +39,8 @@
 
 <div style="overflow:auto">
   <div class="menu">
-    <div class = filterSliders id = "tintSliders">
-      <a><h2>Tint Sliders</h2></a>
+    <div class = filterSliders id = "colorSliders">
+      <a><h2>Color Filter Sliders</h2></a>
       <a style="color:#ff0000">Red: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "redS" onchange = "document.getElementById('red').innerHTML = this.value;">
       <span id="red">0</span></a>
       <a style="color:#00ff00">Green: <input type = "range" min = "0" max = "255" value = "0" class = "slider" id = "greenS" onchange = "document.getElementById('green').innerHTML = this.value;">
@@ -50,7 +50,7 @@
       <a style="color:#aaaaaa">Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opS" onchange = "document.getElementById('opacity').innerHTML = this.value;">
       <span id="opacity">0</span>
       </a>
-      <button type = "button" id = "filter" onclick = "tint();">Apply</button>
+      <button type = "button" id = "filter" onclick = "colorFilter();">Apply</button>
       Select your color with the sliders, then intensity and press "Apply."
     </div>
     <a>
@@ -67,6 +67,11 @@
         <span>Warmth</span>
         <input type = "range" min = "-20" max = "20" value = "0" class = "slider" id = "warS">
         <button type = "button" id = "filter" onclick = "warmth();">Apply</button>
+    </a>
+    <a>
+        <span>Tint</span>
+        <input type = "range" min = "-100" max = "100" value = "0" class = "slider" id = "tinS">
+        <button type = "button" id = "filter" onclick = "tint();">Apply</button>
     </a>
     <a>
         <span>Saturation</span>
