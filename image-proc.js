@@ -9,12 +9,36 @@
 							https://geekofficedog.blogspot.com/2013/04/hello-swirl-swirl-effect-tutorial-in.html?m=1
 		mozilla.org (their pixel manip tutorial)
 			link - https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas
+        stackoverflow
 */
+
+//    This function downloads the current image.
+function download() {
+    window.open(canvas.toDataURL('image/png'));
+    var gh = canvas.toDataURL('png');
+
+    var a  = document.createElement('a');
+    a.href = gh;
+    a.download = 'image.png';
+
+    a.click()
+}
+    //This function tests an image's size against the size of the page.
+    //If the image is in the bound, returns true/
+function imageIsValidSize(image) {
+    const maxX = .4;
+    const maxY = .75;
+    if(image.height <= window.screen.height * maxY && image.width <= window.screen.width * maxX) {
+        return true;
+    }
+    return false;
+}
 
 /*
 	this function is used to set the intensity of the tool
 	it is called by the button in the html file
 */
+
 function setEffectIntensity(intensity) {
     effectIntensity = (intensity / 10.0);
 }
@@ -22,8 +46,6 @@ function setEffectIntensity(intensity) {
 /*
 	This function onloads an image to the canvas using a preset from the directory
 	it is called upon website execution
-
-	The function could be improved by adding a fit to screen portion
 */
 function onloadImage(file) {
 	var img; //the image object
@@ -32,10 +54,9 @@ function onloadImage(file) {
 	img.src = file;
 
 	img.onload = function() {
-		 //setting the canvas dimensions to the image
-		canvas.width = img.width;
-		canvas.height = img.height;
-
+	    //setting the canvas dimensions to the image
+        canvas.width = img.width;
+        canvas.height = img.height;
 		//drawing the image
 		context2d.drawImage(img, 0, 0);
 		//setting the image data into the buffer that will be draw everytime there is a modification
@@ -63,6 +84,12 @@ function loadImage(src){
       var image = new Image();
 			//similar concept to the onload function
       image.onload = function() {
+            if(!imageIsValidSize(image)) { //if imag doesn't fit in page according to this func, fail to upload image
+                alert('Image too large.');
+                console.log('Dropped an image that is too large to be used by canvas.');
+                return;
+            }
+
             // Adjust canvas size to the image dimensions
             canvas.width = image.width;
             canvas.height = image.height;
