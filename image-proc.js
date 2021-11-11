@@ -31,9 +31,8 @@ function download() {
     //This function tests an image's size against the size of the page.
     //If the image is in the bound, returns true/
 function imageIsValidSize(image) {
-    const maxX = .4;
-    const maxY = .75;
-    if(image.height <= window.screen.height * maxY && image.width <= window.screen.width * maxX) {
+    const max = .5; //max portion of window that image can take up
+    if(image.height <= window.screen.height * max && image.width <= window.screen.width * max) {
         return true;
     }
     return false;
@@ -638,6 +637,91 @@ function saturation() {
 	}
     currentBuffer = imageData;
     drawBuffer();
+}
+
+
+//this functions flip the image by iterating through each pixel, and swapping that pixel with the pixel accros the axis (x or y) depending on whether direction is 'horizontal' or 'vertical'
+function flip(direction) {
+    var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    switch(direction) {
+    case "horizontal":
+        for (var y = 0; y < imageData.height; y += 1) {
+            for (var x = 0; x < Math.floor(imageData.width / 2); x += 1) {
+                var left = getPixel(x, y, imageData.width); //left pixel data
+                var right = getPixel(imageData.width - x, y, imageData.width); //pixel data on right
+                //swap left and right pixel data
+                [data[left[0]], data[left[1]], data[left[2]], data[left[3]], data[right[0]], data[right[1]], data[right[2]], data[right[3]]]
+                = 
+                [data[right[0]], data[right[1]], data[right[2]], data[right[3]], data[left[0]], data[left[1]], data[left[2]], data[left[3]]];
+            }
+        }
+        break;
+    case "vertical":
+        for (var x = 0; x < imageData.width; x += 1) {
+            for (var y = 0; y < Math.floor(imageData.height / 2); y += 1) {
+                var top = getPixel(x, y, imageData.width); //top pixel data
+                var bot = getPixel(x, imageData.height - y, imageData.width); //bottom pixel data
+                //swap top and bot pixel data
+                [data[top[0]], data[top[1]], data[top[2]], data[top[3]], data[bot[0]], data[bot[1]], data[bot[2]], data[bot[3]]]
+                = 
+                [data[bot[0]], data[bot[1]], data[bot[2]], data[bot[3]], data[top[0]], data[top[1]], data[top[2]], data[top[3]]];
+            }
+        }
+        break;
+    default:
+        console.log("ERROR: INVALID FLIP AXIS CALLED");
+        return;
+    }
+    currentBuffer = imageData;
+    drawBuffer();
+}
+
+function rotate(degree) {
+    var swapWH = (degree != 180); //if degree is 180, don't swap, otherwise, swap height and width
+    var oldImageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    const oldData = oldImageData.data;
+
+    var newImageData; //new canvas size depends on degree of rotation
+    if(swapWH) { newImageData = context2d.createImageData(canvas.height, canvas.width); } //if degree is 90 or -90, swap width and height
+    else { newImageData = context2d.createImageData(canvas.width, canvas.height); } //if degree is 180, don't swap width and height'
+    console.log(swapWH);
+    const newData = newImageData.data;
+
+    for (var y = 0; y < oldImageData.height; y += 1) {
+        for (var x = 0; x < oldImageData.width; x += 1) 
+        {
+            var pre = getPixel(x, y, oldImageData.width); // pixel data from old image
+            switch(degree) {
+            case 90:
+                var post = getPixel(Math.abs(y - oldImageData.height), x, newImageData.width); // pixel data from new image
+                break;
+            case -90:
+                var post = getPixel(y, Math.abs(x - oldImageData.width), newImageData.width); // pixel data from new image
+                break;
+            case 180:
+                var post = getPixel(oldImageData.width - x, oldImageData.height - y, newImageData.width);
+                break;
+            default:
+               console.log("ERROR: INVALID ROTATE CALLED");
+               return;
+           }
+           //swap them, moving the old pixels to their respective location in the new image
+           [newData[post[0]], newData[post[1]], newData[post[2]], newData[post[3]]] 
+                =
+           [oldData[pre[0]], oldData[pre[1]], oldData[pre[2]], oldData[pre[3]]];
+        }
+    }
+    if(swapWH) { [canvas.width, canvas.height] = [canvas.height, canvas.width]; } //swap width and height of image if degree is 90 or -90
+    currentBuffer = newImageData;
+    drawBuffer(); //apply new image
+}
+
+//gets pixelData give a distance x from the left, a distance y from the top, and a width of width. Returns data in form of [red, green, blue, alpha]
+function getPixel(x, y, width) {
+    var red = y * (width * 4) + x * 4;
+    return [red, red + 1, red + 2, red + 3];
 }
 
 var effectIntensity; //setting the default effectIntensity

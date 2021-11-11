@@ -91,6 +91,13 @@
     Swirl Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br></a>
     <a><button onclick="toggleTool(3)">Color Pick</button><br>
     Selected Color: <div align="center" class="color-cell" id="selected-color"></div></a>
+    <a>
+        <button onclick = "flip('vertical')"> Flip vertical </button>
+        <button onclick = "flip('horizontal')"> Flip horizontal </button>
+        <button onclick = "rotate(90)"> Rotate Right 90° </button>
+        <button onclick = "rotate(-90)"> Rotate Left 90° </button>
+        <button onclick = "rotate(180)"> Rotate 180° </button>
+    </a>
     <a><button onclick="download()">Download Image</button></a>
   </div>
   <div style="text-align: center">Select your tool by clicking on it, then click the picture to apply the tool.</div>
