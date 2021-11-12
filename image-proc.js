@@ -31,12 +31,15 @@ function download() {
     //This function tests an image's size against the size of the page.
     //If the image is in the bound, returns true/
 function imageIsValidSize(image) {
-    const max = .5; //max portion of window that image can take up
+    const max = .6; //max portion of window that image can take up
     if(image.height <= window.screen.height * max && image.width <= window.screen.width * max) {
         return true;
     }
     return false;
 }
+
+//converts hexadecimal string to {r,g,b}
+//from - https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 
 /*
 	this function is used to set the intensity of the tool
@@ -536,18 +539,25 @@ function randomPreset() {
     this function is called when the the filter button is pressed
     It uses input from the four sliders next to the button to apply a filter.
 */
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
 function colorFilter() {
-    var red = parseInt(document.getElementById('redS').value);
-    var green = parseInt(document.getElementById('greenS').value);
-    var blue = parseInt(document.getElementById('blueS').value);
+    var color = hexToRgb(document.getElementById('sColor').value);
     var opacity = parseInt(document.getElementById('opS').value) / 100.0;
 
     var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     for (var i = 0; i < data.length; i += 4) {
-		data[i] = opacity * red + (1 - opacity) * data[i];
-		data[i + 1] = opacity * green + (1 - opacity) * data[i + 1];
-		data[i + 2] = opacity * blue + (1 - opacity) * data[i + 2];
+		data[i] = opacity * color.r + (1 - opacity) * data[i];
+		data[i + 1] = opacity * color.g + (1 - opacity) * data[i + 1];
+		data[i + 2] = opacity * color.b + (1 - opacity) * data[i + 2];
 	}
     currentBuffer = imageData;
     drawBuffer();
