@@ -643,30 +643,31 @@ function brush(x, y, radious) {
     var color = hexToRgb(document.getElementById('bColor').value);
     var opacity = parseInt(document.getElementById('opB').value) / 100;
     var strokeStyle = rgbaToStrokeStyle(color.r, color.g, color.b, opacity);
+
     switch (active_brush) {
-    case brushSet.PENCIL:
-        pencil(x, y, radious, strokeStyle);
-        break;
-    case brushSet.MARKER:
-        marker(x, y, radious, strokeStyle);
-        break;
-    case brushSet.PEARL:
-        pearl(x, y, strokeStyle);
-        break;
-    //case brushSet.WIGGLE:
-        //wiggle(x, y);
-        //break;
-    case brushSet.PEN:
-        pen(x, y, radious, strokeStyle);
-        break;
-    case brushSet.HATCH:
-        hatching(x, y, strokeStyle);
-        break;
-    //case brushSet.SPRAY:
-        //spray(x, y);
-        //break;
-    default:
-        console.log("ERROR: brushSet has invalid value.")
+      case brushSet.PENCIL:
+          pencil(x, y, radious, strokeStyle);
+          break;
+      case brushSet.MARKER:
+          marker(x, y, radious, strokeStyle);
+          break;
+      case brushSet.PEARL:
+          pearl(x, y, strokeStyle);
+          break;
+      //case brushSet.WIGGLE:
+          //wiggle(x, y);
+          //break;
+      case brushSet.PEN:
+          pen(x, y, radious, strokeStyle);
+          break;
+      case brushSet.HATCH:
+          hatching(x, y, strokeStyle);
+          break;
+      //case brushSet.SPRAY:
+          //spray(x, y);
+          //break;
+      default:
+          console.log("ERROR: brushSet has invalid value.");
     }
 
     //updating the buffer because otherwise it won't draw!
@@ -725,7 +726,7 @@ function pen(x, y, radious, style) {
     context2d.beginPath();
     context2d.moveTo(lerpX + radious, lerpY + radious);
     context2d.strokeStyle = style;
-    context2d.lineWidth = 5;
+    context2d.lineWidth = 3;
     context2d.lineTo(lerpX - radious, lerpY - radious);
     context2d.stroke();
   }
@@ -744,7 +745,7 @@ function hatching(x, y, style) {
     context2d.beginPath();
     context2d.moveTo(lerpX - (y - brushCache.y), lerpY - (x - brushCache.x));
     context2d.strokeStyle = style; //i want the color to match the pickedColor essentially
-    context2d.lineWidth = 5;
+    context2d.lineWidth = 1;
     context2d.lineTo(lerpX + (y - brushCache.y), lerpY + (x - brushCache.x));
     context2d.stroke();
   }
