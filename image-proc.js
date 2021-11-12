@@ -31,7 +31,7 @@ function download() {
     //This function tests an image's size against the size of the page.
     //If the image is in the bound, returns true/
 function imageIsValidSize(image) {
-    const max = .6; //max portion of window that image can take up
+    const max = .75; //max portion of window that image can take up
     if(image.height <= window.screen.height * max && image.width <= window.screen.width * max) {
         return true;
     }
@@ -78,25 +78,24 @@ function onloadImage(file) {
 	again, could be improved by fitting to the screen
 */
 function loadImage(src){
-  //prevent any non-image file type from being read.
-  if(!src.type.match(/image.*/)){
-    console.log("The dropped file is not an image: ", src.type); //output to the console (inspect element)
-	  scr.value = "";
-    return;
-  }
+    //prevent any non-image file type from being read.
+    if(!src.files[0].type.match(/image.*/)){
+        console.log("The dropped file is not an image: ", src.files[0].type); //output to the console (inspect element)
+	    scr.value = "";
+        return;
+    }
 
-  //create our FileReader and run the results through the render function.
-  var reader = new FileReader();
-  reader.onload = function(e) {
-      var image = new Image();
+//create our FileReader and run the results through the render function.
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var image = new Image();
 			//similar concept to the onload function
-      image.onload = function() {
+        image.onload = function() {
             if(!imageIsValidSize(image)) { //if imag doesn't fit in page according to this func, fail to upload image
                 alert('Image too large.');
                 console.log('Dropped an image that is too large to be used by canvas.');
                 return;
             }
-
             // Adjust canvas size to the image dimensions
             canvas.width = image.width;
             canvas.height = image.height;
@@ -104,14 +103,14 @@ function loadImage(src){
             //save a copy of loaded pixels
             context2d.drawImage(image, 0, 0);
             currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
-      }
-	image.onerror = function() {
-		alert('Invalid image');
-		console.log("The dropped file is not an image");
-	};
-      image.src = e.target.result;
-  };
-  reader.readAsDataURL(src);
+        }
+        image.onerror = function() {
+            console.log("The dropped file is not an image");
+        };  
+        image.src = e.target.result;
+        src.value = "";
+    };
+    reader.readAsDataURL(src.files[0]);
 }
 
 /*
@@ -133,13 +132,11 @@ function onMouseWheel(event) {
 
     if (event.wheelDelta) { //change in mousewheel (for chrome)
         console.log(event.wheelDelta);    
-        switch (event.wheelDelta) {
-					//add size depending on speed
-            case  150: toolRadious += 1; break;
-            //case  240: toolRadious += 2; break;
-					//remove size depending on speed
-            case -150: toolRadious -= 1; break;
-            //case -240: toolRadious -= 2; break;
+        if (event.wheelDelta < 0) {
+            toolRadious -= 1;
+        }
+        else {
+            toolRadious += 1;
         }
     } else if (event.detail) { //for other browser
         if (event.detail < 0) {
@@ -164,19 +161,46 @@ function onMouseMove(event) {
     if (!currentBuffer) { //no value, exit
         return;
     }
-    if(toolID == 3) { //checking if we are in color pick mode
-			//if we are we have to update the hovered color
-			//we also need to draw the tool
-      drawTool(event.clientX, event.clientY, pick(event));
+
+    var rect = canvas.getBoundingClientRect(); //check within the bounds of the canvas
+    var x = (event.clientX - rect.left) | 0;
+    var y = (event.clientY - rect.top) | 0;
+
+    if(active_tool == toolID.PICK) { //checking if we are in color pick mode
+		//if we are we have to update the hovered color
+		//we also need to draw the tool
+        drawTool(event.clientX, event.clientY, pick(event));
+    } else if(mouse_down) {
+        switch (active_tool) {
+        case toolID.NONE:
+            break;
+        case toolID.LIQUIFY:
+            if(liquify_time < 10) {
+                liquify(currentBuffer, x, y, toolRadious);
+                //console.log(x, y); //we send a log of the clicked pixel to the console
+                drawBuffer(); //upadte the image
+                ++liquify_time;
+            }
+            break;
+        case toolID.BRUSH:
+            brush(x, y, toolRadious);
+            //console.log(x, y); //we send a log of the clicked pixel to the console
+            brushCache.x = x;
+            brushCache.y = y;
+            drawBuffer();
+            break;
+        default:
+            console.log("ERROR: toolID has invalid value.");
+        }
     } else {
-      drawTool(event.clientX, event.clientY, '#000000')
+        drawTool(event.clientX, event.clientY, '#000000');
     }
 }
 function onMouseDown(event) {
     if (!currentBuffer) { //no value, exit
         return;
     }
-
+    mouse_down = true;
     var rect = canvas.getBoundingClientRect(); //check within the bounds of the canvas
     var x = (event.clientX - rect.left) | 0;
     var y = (event.clientY - rect.top) | 0;
@@ -188,35 +212,34 @@ function onMouseDown(event) {
 			I think this could be optimized by using an array of bools
 			we'd need to know how many tools we have for that though
 		*/
-    switch(toolID) {
-        case 0:
+    switch(active_tool) {
+        case toolID.none:
             break;
-        case 1:
+        case toolID.SWIRL:
             swirl(currentBuffer, x, y, toolRadious);
             break;
-        case 2: 
+        case toolID.LIQUIFY: 
             liquify(currentBuffer, x, y, toolRadious);
             break;
-        case 3:
+        case toolID.PICK:
             var picked = pick(event);
             pickedColor.style.background = picked;
             pickedColor.textContent = picked;
             break;
+        case toolID.BRUSH:
+            brushCache.x = x;
+            brushCache.y = y;
+            break;
         default:
-            system.log("ERROR: toolID has invalid value.");
+            console.log("ERROR: toolID invalid value: " + active_tool);
     }
-    /*if(doLiquify && !doSwirl && !doColorPick) {
-      liquify(currentBuffer, x, y, toolRadious);
-    } else if(!doLiquify && doSwirl && !doColorPick) {
-      swirl(currentBuffer, x, y, toolRadious);
-    } else if(!doLiquify && !doSwirl && doColorPick) {
-      var picked = pick(event);
-      pickedColor.style.background = picked;
-      pickedColor.textContent = picked;
-    }*/
     drawBuffer(); //upadte the image
 }
 
+function onMouseUp(event) {
+    mouse_down = false;
+    liquify_time = 0;
+}
 
 //This next set are concerned with drawing
 /*
@@ -226,30 +249,33 @@ function onMouseDown(event) {
 	there may be a more efficient way to handle this drawing part though
 */
 function drawTool(clientX, clientY, hovered) {
+    validToolSet = new Set([toolID.LIQUIFY, toolID.SWIRL, toolID.PICK] ); //this is the set of IDs that will draw a circle on the mouse pointer
+    if(!validToolSet.has(active_tool))
+        return;
     var rect = canvas.getBoundingClientRect(); //checking if within canvas
     var x = clientX - rect.left;
     var y = clientY - rect.top;
 
     drawBuffer(); //we update the image
 
-    if(toolID != 3) { //if we are not color picking
-			//we draw a circle centered on the mouse
-			context2d.beginPath();
-      context2d.arc(x, y, toolRadious, 0, 2 * Math.PI, false);
-      context2d.lineWidth = 1;
-      context2d.strokeStyle = '#0000fa';
-      context2d.closePath();
-      context2d.stroke();
+    if(active_tool != toolID.PICK) { //if we are not color picking
+	    //we draw a circle centered on the mouse
+	    context2d.beginPath();
+        context2d.arc(x, y, toolRadious, 0, 2 * Math.PI, false);
+        context2d.lineWidth = 1;
+        context2d.strokeStyle = '#0000fa';
+        context2d.closePath();
+        context2d.stroke();
     } else { //if we are color picking
 			//we draw an offset circle with a larger stroke and filled with the color hovered
-			context2d.beginPath();
-      context2d.arc(x + 20, y - 20, 20, 0, 2 * Math.PI, false);
-      context2d.lineWidth = 5;
-      context2d.strokeStyle = '#0000fa';
-			context2d.fillStyle = hovered;
-      context2d.closePath();
-			context2d.fill();
-      context2d.stroke();
+	    context2d.beginPath();
+        context2d.arc(x + 20, y - 20, 20, 0, 2 * Math.PI, false);
+        context2d.lineWidth = 5;
+        context2d.strokeStyle = '#0000fa';
+	    context2d.fillStyle = hovered;
+        context2d.closePath();
+	    context2d.fill();
+        context2d.stroke();
     }
 }
 function drawBuffer() {
@@ -287,6 +313,36 @@ function copyImageData(srcPixels, dstPixels, width, height) {
 function createCompatibleImageData(imgData) {
     return context2d.createImageData(imgData.width, imgData.height);
 }
+
+/*
+  Here is an enumeration of the tools!
+  As more tools get added, please add them to this enum!
+*/
+const toolID = {
+  NONE: 0,
+  SWIRL: 1,
+  LIQUIFY: 2,
+  PICK: 3,
+  FILTER: 4,
+  BRUSH: 5,
+}
+
+const brushSet = {
+  NONE: 0,
+  PENCIL: 1,
+  MARKER: 2,
+  PEARL: 3,
+  WIGGLE: 4,
+  PEN: 5,
+  HATCH: 6,
+  SPRAY: 7,
+}
+
+class BrushCache {
+  x;
+  y;
+}
+
 /*
 	These are the tools and features of the program
 
@@ -517,7 +573,9 @@ function pick(event) {
     If the selected tool is equal to anything else, switch to the new tool. (set toolID to the ID of the tool we are toggling)
 	These are called by their respective buttons in the html file
 */
-function toggleTool(ID) {toolID = toolID == ID ? 0 : ID; }
+function toggleTool(ID) {active_tool = active_tool == ID ? toolID.NONE : ID; }
+
+function setBrush(ID) { active_brush = active_brush == ID ? brushSet.NONE : ID; }
 
 /*
 	this function just returns a random string containg a path to an image file
@@ -561,6 +619,121 @@ function colorFilter() {
 	}
     currentBuffer = imageData;
     drawBuffer();
+}
+
+function rgbaToStrokeStyle(r,g,b,a) { return "rgba(" + r + "," + g + "," + b + "," + a + ")"; }
+
+function brush(x, y, radious) {
+    //this function just switches between the brush aux functions
+    var color = hexToRgb(document.getElementById('bColor').value);
+    var opacity = parseInt(document.getElementById('opB').value) / 100;
+    var strokeStyle = rgbaToStrokeStyle(color.r, color.b, color.g, opacity);
+    switch (active_brush) {
+    case brushSet.PENCIL:
+        pencil(x, y, radious, strokeStyle);
+        break;
+    case brushSet.MARKER:
+        marker(x, y, radious, strokeStyle);
+        break;
+    case brushSet.PEARL:
+        pearl(x, y, strokeStyle);
+        break;
+    //case brushSet.WIGGLE:
+        //wiggle(x, y);
+        //break;
+    case brushSet.PEN:
+        pen(x, y, radious, strokeStyle);
+        break;
+    case brushSet.HATCH:
+        hatching(x, y, strokeStyle);
+        break;
+    //case brushSet.SPRAY:
+        //spray(x, y);
+        //break;
+    default:
+        console.log("ERROR: brushSet has invalid value.")
+    }
+
+    //updating the buffer because otherwise it won't draw!
+    currentBuffer = context2d.getImageData(0, 0, canvas.width, canvas.height);
+}
+
+function pencil(x, y, radious, style) {
+    //drawing the lines
+    context2d.beginPath();
+    context2d.moveTo(brushCache.x, brushCache.y);
+    context2d.strokeStyle = style; //i want the color to match the pickedColor essentially
+    context2d.lineWidth = radious; //this is the tool's radious
+    context2d.lineCap = "round";
+    context2d.lineJoin = "round";
+    context2d.lineTo(x, y);
+    context2d.stroke();
+}
+
+function marker(x, y, radious, style) {
+  //drawing the circles
+  context2d.beginPath();
+  context2d.arc(x, y, radious, 0, 2 * Math.PI, false); //draw circles on the mouse
+  context2d.fillStyle = style; //i want the color to match the pickedColor essentially
+  context2d.closePath();
+  context2d.fill();
+}
+
+function pearl(x, y, style) {
+  distance = Math.sqrt(Math.pow(x - brushCache.x, 2) + Math.pow(y - brushCache.y, 2));
+  midX = (x + brushCache.x) / 2;
+  midY = (y + brushCache.y) / 2;
+
+  //drawing the cirlces
+  context2d.beginPath();
+  context2d.arc(midX, midY, distance, 0, 2 * Math.PI, false); //draw circles in the mid point of currPos and prevPos
+  context2d.fillStyle = style; //i want the color to match the pickedColor essentially
+  context2d.closePath();
+  context2d.fill();
+}
+function pen(x, y, radious, style) {
+  const lerps = 16; //lerps are linear interpolations, so this is the amount of them we are doing
+
+  for(let i = 0; i < lerps; ++i) {
+    //finding the lerp distances so that the pen looks more fluid
+    const lerpX = lerp(x, brushCache.x, i / lerps);
+    const lerpY = lerp(y, brushCache.y, i / lerps);
+
+    //drawing the lines
+    context2d.beginPath();
+    context2d.moveTo(lerpX + radious, lerpY + radious);
+    context2d.strokeStyle = style;
+    context2d.lineWidth = 5;
+    context2d.lineTo(lerpX - radious, lerpY - radious);
+    context2d.stroke();
+  }
+}
+function hatching(x, y, color, opacity) {
+  let speed = Math.abs(x - brushCache.x) + Math.abs(y - brushCache.y); //the speed determines the size
+
+  const lerps = 16; //lerps are linear interpolations, so this is the amount of them we are doing
+
+  for(let i = 0; i < lerps; ++i) {
+    //finding the lerp distances so that the pen looks more fluid
+    const lerpX = lerp(x, brushCache.x, i / lerps);
+    const lerpY = lerp(y, brushCache.y, i / lerps);
+
+    //drawing the lines
+    context2d.beginPath();
+    context2d.moveTo(lerpX - (y - brushCache.y), lerpY - (x - brushCache.x));
+    context2d.strokeStyle = style; //i want the color to match the pickedColor essentially
+    context2d.lineWidth = 5;
+    context2d.lineTo(lerpX + (y - brushCache.y), lerpY + (x - brushCache.x));
+    context2d.stroke();
+  }
+}
+
+/*
+  this function does a really rudementary linear interpolation because I dunno how to do that yet
+  the lerp function returns a position based on a ratio and distance
+*/
+function lerp(init, final, ratio) {
+  return init + Math.sqrt(Math.pow(final - init, 2)) * ratio
 }
 
 //for color values. If a color value would go out of bounds, it instead hits a min of 0 or max of 255
@@ -742,6 +915,11 @@ var canvas = document.getElementById(canvasId); //we are just grabbing canvas ba
 var context2d = canvas.getContext('2d'); //grabbing the context
 const MIN_TOOL_RADIOUS = 10; //setting min tool size
 const MAX_TOOL_RADIOUS = 80; //setting the max tool size
+var mouse_down = false; //this is a bool for dragging!
+var liquify_time = 0; //this is a count for dragging liquify, essentially a timer
+var brushCache = new BrushCache();
+var flip = 0;
+
 
 /*
 	This is a cell that holds the picked color
@@ -749,9 +927,8 @@ const MAX_TOOL_RADIOUS = 80; //setting the max tool size
 	we can modify this so that we can display the current color for when we add a brush tool
 */
 var pickedColor = document.getElementById('selected-color');
-//these are the tool bools
-var toolID = 0; //no tool = 0, swirl = 1, liquify = 2, colorPick = 3, further tools could be added on this way
-//var doSwirl = false, doLiquify = false, doColorPick = false;
+var active_tool = toolID.NONE; //this is the active tool variable, set it using the enum created
+var active_brush = brushSet.NONE; //this is the active brush variable, set it using the enum created
 
 setEffectIntensity(40); //this is the default effectIntensity
 
@@ -768,4 +945,5 @@ if (canvas.addEventListener) {
     canvas.addEventListener('mousewheel', onMouseWheel, false);
     canvas.addEventListener('DOMMouseScroll', onMouseWheel, false);
     canvas.addEventListener('mousedown', onMouseDown, false);
+    canvas.addEventListener('mouseup', onMouseUp, false);
 }
