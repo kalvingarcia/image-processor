@@ -19,14 +19,11 @@
             from - https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 */
 
-/*
-  This class is used to keep track of the mouse's previous position for brush drawing
-*/
+//This class is used to keep track of the mouse's previous position for brush drawing
 class BrushCache {
   x;
   y;
 }
-
 
 //This function tests an image's size against the size of the page.
 //If the image is in the bound, returns true/
@@ -101,7 +98,7 @@ function loadImage(src){
     };
     reader.readAsDataURL(src.files[0]);
 }
-//    This function downloads the current image.
+//This function downloads the current image.
 function download() {
     window.open(canvas.toDataURL('image/png'));
     var gh = canvas.toDataURL('png');
@@ -286,6 +283,12 @@ function drawPixels(canvasId, imageData) {
     context2d.putImageData(imageData, 0, 0);
 }
 
+//gets pixelData give a distance x from the left, a distance y from the top, and a width of width. Returns data in form of [red, green, blue, alpha]
+function getPixel(x, y, width) {
+    var red = y * (width * 4) + x * 4;
+    return [red, red + 1, red + 2, red + 3];
+}
+
 /*
 	Copy the pixels of the 'srcPixels' ImageData parameter
 	into the 'dstPixels' parameter
@@ -325,6 +328,17 @@ const toolID = {
   BRUSH: 5,
 }
 /*
+	These next function just toggles the tools
+    If the selected tool is current active (toolID is equal to the ID of the tool we are toggling) turn it off, and set tool to none (toolID = 0)
+    (none == 0, swirl == 1, liquify == 2, clor pick == 3)
+    If the selected tool is equal to anything else, switch to the new tool. (set toolID to the ID of the tool we are toggling)
+	These are called by their respective buttons in the html file
+*/
+function toggleTool(ID) {
+  active_tool = active_tool == ID ? toolID.NONE : ID;
+}
+
+/*
   Here is an enumeration of the brushes!
   As more brushes get added, please add them to this enum!
 */
@@ -338,17 +352,12 @@ const brushSet = {
   HATCH: 6,
   SPRAY: 7,
 }
-
 /*
-	These next function just toggles the tools
-    If the selected tool is current active (toolID is equal to the ID of the tool we are toggling) turn it off, and set tool to none (toolID = 0)
-    (none == 0, swirl == 1, liquify == 2, clor pick == 3)
-    If the selected tool is equal to anything else, switch to the new tool. (set toolID to the ID of the tool we are toggling)
-	These are called by their respective buttons in the html file
+	These next function just toggles the brushes
+    If the selected brush is current active (brushSet is equal to the ID of the brush we are toggling) turn it off, and set tool to none (brushSet = 0)
+    (none == 0, pencil == 1, marker == 2, pearl == 3, pen == 4, hatching == 5)
+	 These are called by their respective buttons in the html file
 */
-function toggleTool(ID) {
-  active_tool = active_tool == ID ? toolID.NONE : ID;
-}
 function setBrush(ID) {
   active_brush = active_brush == ID ? brushSet.NONE : ID;
 }
@@ -397,6 +406,9 @@ function rgbaToStrokeStyle(r,g,b,a) {
 		we should try making it able to be dragged
 	swirl: this tool literally swirls a portion of the image
 	pick: this is the color pick tool
+  filter: this function is called when the the filter button is pressed
+    It uses input from the four sliders next to the button to apply a filter.
+  brush: a tool to draw on the canvas baby!
 */
 function liquify(sourceImgData, x, y, radious) {
     var sourcePosition, destPosition;
@@ -661,6 +673,15 @@ function brush(x, y, radious) {
     currentBuffer = context2d.getImageData(0, 0, canvas.width, canvas.height);
 }
 
+/*
+  These are the brush auxillary functions, basically these do the actual work and brush just picks between them
+
+  pencil draws a stroke of toolradius wide
+  marker makes circles that should be slightly transparent, but I have yet to figure that one out
+  pearl makes circles too, but they are connected based on the mouse's distance from its previous point
+  pen is like a fountain pen, where its a flat line
+  hatching is pen, but angled based on the mouse's direction
+*/
 function pencil(x, y, radious, style) {
     //drawing the lines
     context2d.beginPath();
@@ -882,12 +903,6 @@ function rotate(degree) {
     drawBuffer(); //apply new image
 }
 
-//gets pixelData give a distance x from the left, a distance y from the top, and a width of width. Returns data in form of [red, green, blue, alpha]
-function getPixel(x, y, width) {
-    var red = y * (width * 4) + x * 4;
-    return [red, red + 1, red + 2, red + 3];
-}
-
 /*
 	this function just returns a random string containg a path to an image file
 
@@ -905,19 +920,28 @@ function randomPreset() {
         return 'Presets/monalisa.jpg'
 }
 
-var effectIntensity; //setting the default effectIntensity
-var canvasId = 'canvas1'; //this is the canvas ID
-var currentBuffer;
-var toolRadious = 30; //default tool radius
-var canvas = document.getElementById(canvasId); //we are just grabbing canvas based on ID
+
+/*
+  this is where the main part of the program begins
+
+  All of our globals are declared here
+*/
+var canvas = document.getElementById('canvas1'); //we are just grabbing canvas based on ID
 var context2d = canvas.getContext('2d'); //grabbing the context
+var currentBuffer;
+
 const MIN_TOOL_RADIOUS = 10; //setting min tool size
 const MAX_TOOL_RADIOUS = 80; //setting the max tool size
+var effectIntensity; //setting the default effectIntensity
+var toolRadious = 30; //default tool radius
+var active_tool = toolID.NONE; //this is the active tool variable, set it using the enum created
+var active_brush = brushSet.NONE; //this is the active brush variable, set it using the enum created
+
+setEffectIntensity(40); //this is the default effectIntensity
+
 var mouse_down = false; //this is a bool for dragging!
 var liquify_time = 0; //this is a count for dragging liquify, essentially a timer
 var brushCache = new BrushCache();
-var flip = 0;
-
 
 /*
 	This is a cell that holds the picked color
@@ -925,10 +949,6 @@ var flip = 0;
 	we can modify this so that we can display the current color for when we add a brush tool
 */
 var pickedColor = document.getElementById('selected-color');
-var active_tool = toolID.NONE; //this is the active tool variable, set it using the enum created
-var active_brush = brushSet.NONE; //this is the active brush variable, set it using the enum created
-
-setEffectIntensity(40); //this is the default effectIntensity
 
 //setting the initial image
 var imgSrc = randomPreset();
