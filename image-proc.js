@@ -15,39 +15,27 @@
             link - https://tannerhelland.com/2014/07/01/simple-algorithms-adjusting-image-temperature-tint.html
         alienryderflex.com (for saturation)
             link - http://alienryderflex.com/saturation.html
+    converts hexadecimal string to {r,g,b}
+            from - https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 */
 
-//    This function downloads the current image.
-function download() {
-    window.open(canvas.toDataURL('image/png'));
-    var gh = canvas.toDataURL('png');
-
-    var a  = document.createElement('a');
-    a.href = gh;
-    a.download = 'image.png';
-
-    a.click()
+/*
+  This class is used to keep track of the mouse's previous position for brush drawing
+*/
+class BrushCache {
+  x;
+  y;
 }
-    //This function tests an image's size against the size of the page.
-    //If the image is in the bound, returns true/
+
+
+//This function tests an image's size against the size of the page.
+//If the image is in the bound, returns true/
 function imageIsValidSize(image) {
     const max = .75; //max portion of window that image can take up
     if(image.height <= window.screen.height * max && image.width <= window.screen.width * max) {
         return true;
     }
     return false;
-}
-
-//converts hexadecimal string to {r,g,b}
-//from - https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
-
-/*
-	this function is used to set the intensity of the tool
-	it is called by the button in the html file
-*/
-
-function setEffectIntensity(intensity) {
-    effectIntensity = (intensity / 10.0);
 }
 
 /*
@@ -81,11 +69,11 @@ function loadImage(src){
     //prevent any non-image file type from being read.
     if(!src.files[0].type.match(/image.*/)){
         console.log("The dropped file is not an image: ", src.files[0].type); //output to the console (inspect element)
-	    scr.value = "";
+	      scr.value = "";
         return;
     }
 
-//create our FileReader and run the results through the render function.
+    //create our FileReader and run the results through the render function.
     var reader = new FileReader();
     reader.onload = function(e) {
         var image = new Image();
@@ -105,12 +93,24 @@ function loadImage(src){
             currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
         }
         image.onerror = function() {
+            alert('Not a valid image.');
             console.log("The dropped file is not an image");
         };
         image.src = e.target.result;
         src.value = "";
     };
     reader.readAsDataURL(src.files[0]);
+}
+//    This function downloads the current image.
+function download() {
+    window.open(canvas.toDataURL('image/png'));
+    var gh = canvas.toDataURL('png');
+
+    var a  = document.createElement('a');
+    a.href = gh;
+    a.download = 'image.png';
+
+    a.click()
 }
 
 /*
@@ -235,7 +235,6 @@ function onMouseDown(event) {
     }
     drawBuffer(); //upadte the image
 }
-
 function onMouseUp(event) {
     mouse_down = false;
     liquify_time = 0;
@@ -281,7 +280,6 @@ function drawTool(clientX, clientY, hovered) {
 function drawBuffer() {
     context2d.putImageData(currentBuffer, 0, 0); //put the image data on the canvas
 }
-
 //This renders the 'imageData' parameter into the canvas
 function drawPixels(canvasId, imageData) {
     var context2d = getContext2d(canvasId);
@@ -326,7 +324,10 @@ const toolID = {
   FILTER: 4,
   BRUSH: 5,
 }
-
+/*
+  Here is an enumeration of the brushes!
+  As more brushes get added, please add them to this enum!
+*/
 const brushSet = {
   NONE: 0,
   PENCIL: 1,
@@ -338,9 +339,55 @@ const brushSet = {
   SPRAY: 7,
 }
 
-class BrushCache {
-  x;
-  y;
+/*
+	These next function just toggles the tools
+    If the selected tool is current active (toolID is equal to the ID of the tool we are toggling) turn it off, and set tool to none (toolID = 0)
+    (none == 0, swirl == 1, liquify == 2, clor pick == 3)
+    If the selected tool is equal to anything else, switch to the new tool. (set toolID to the ID of the tool we are toggling)
+	These are called by their respective buttons in the html file
+*/
+function toggleTool(ID) {
+  active_tool = active_tool == ID ? toolID.NONE : ID;
+}
+function setBrush(ID) {
+  active_brush = active_brush == ID ? brushSet.NONE : ID;
+}
+
+
+/*
+	this function is used to set the intensity of the tool
+	it is called by the button in the html file
+*/
+function setEffectIntensity(intensity) {
+    effectIntensity = (intensity / 10.0);
+}
+/*
+    this function is called when the the filter button is pressed
+    It uses input from the four sliders next to the button to apply a filter.
+*/
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+//for color values. If a color value would go out of bounds, it instead hits a min of 0 or max of 255
+function truncate(input) {
+    if(input < 0) {return 0;}
+    if(input > 255) {return 255;}
+    return input;
+}
+/*
+  this function does a really rudementary linear interpolation because I dunno how to do that yet
+  the lerp function returns a position based on a ratio and distance
+*/
+function lerp(init, final, ratio) {
+  return init + Math.sqrt(Math.pow(final - init, 2)) * ratio
+}
+function rgbaToStrokeStyle(r,g,b,a) {
+  return "rgba(" + r + "," + g + "," + b + "," + a + ")";
 }
 
 /*
@@ -565,47 +612,6 @@ function pick(event) {
 	const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`; //we convert the data to a string
   return rgba; //return the rgba string usable in all instances where CSS would be used (can also convert to hex)
 }
-
-/*
-	These next function just toggles the tools
-    If the selected tool is current active (toolID is equal to the ID of the tool we are toggling) turn it off, and set tool to none (toolID = 0)
-    (none == 0, swirl == 1, liquify == 2, clor pick == 3)
-    If the selected tool is equal to anything else, switch to the new tool. (set toolID to the ID of the tool we are toggling)
-	These are called by their respective buttons in the html file
-*/
-function toggleTool(ID) {active_tool = active_tool == ID ? toolID.NONE : ID; }
-
-function setBrush(ID) { active_brush = active_brush == ID ? brushSet.NONE : ID; }
-
-/*
-	this function just returns a random string containg a path to an image file
-
-	called at the start of the program to grab a preset
-*/
-function randomPreset() {
-	var option = Math.floor(Math.random() * 4);
-	if (option == 0)
-		return 'Presets/Cat.jpg';
-	if (option == 1)
-		return 'Presets/CATT.jpg';
-	if (option == 2)
-		return 'Presets/earth.png';
-    if (option == 3)
-        return 'Presets/monalisa.jpg'
-}
-/*
-    this function is called when the the filter button is pressed
-    It uses input from the four sliders next to the button to apply a filter.
-*/
-function hexToRgb(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-}
-
 function colorFilter() {
     var color = hexToRgb(document.getElementById('sColor').value);
     var opacity = parseInt(document.getElementById('opS').value) / 100.0;
@@ -620,9 +626,6 @@ function colorFilter() {
     currentBuffer = imageData;
     drawBuffer();
 }
-
-function rgbaToStrokeStyle(r,g,b,a) { return "rgba(" + r + "," + g + "," + b + "," + a + ")"; }
-
 function brush(x, y, radious) {
     //this function just switches between the brush aux functions
     var color = hexToRgb(document.getElementById('bColor').value);
@@ -669,7 +672,6 @@ function pencil(x, y, radious, style) {
     context2d.lineTo(x, y);
     context2d.stroke();
 }
-
 function marker(x, y, radious, style) {
   //drawing the circles
   context2d.beginPath();
@@ -678,7 +680,6 @@ function marker(x, y, radious, style) {
   context2d.closePath();
   context2d.fill();
 }
-
 function pearl(x, y, style) {
   distance = Math.sqrt(Math.pow(x - brushCache.x, 2) + Math.pow(y - brushCache.y, 2));
   midX = (x + brushCache.x) / 2;
@@ -728,21 +729,6 @@ function hatching(x, y, style) {
   }
 }
 
-/*
-  this function does a really rudementary linear interpolation because I dunno how to do that yet
-  the lerp function returns a position based on a ratio and distance
-*/
-function lerp(init, final, ratio) {
-  return init + Math.sqrt(Math.pow(final - init, 2)) * ratio
-}
-
-//for color values. If a color value would go out of bounds, it instead hits a min of 0 or max of 255
-function truncate(input) {
-    if(input < 0) {return 0;}
-    if(input > 255) {return 255;}
-    return input;
-}
-
 //called from brightness button, brightness val is controlled by briS slider
 //adds some constant brightness to r,g,b values.
 //from - https://ie.nitk.ac.in/blog/2020/01/19/algorithms-for-adjusting-brightness-and-contrast-of-an-image/
@@ -758,7 +744,6 @@ function brightness() {
     currentBuffer = imageData;
     drawBuffer();
 }
-
 //called from contrast button, contrast val is controlled by conS slider
 //modifies r, g, and b values with given contrast value. positive values increase contrast, negatives decrease contrast.
 //from - https://ie.nitk.ac.in/blog/2020/01/19/algorithms-for-adjusting-brightness-and-contrast-of-an-image/
@@ -775,7 +760,6 @@ function contrast() {
     currentBuffer = imageData;
     drawBuffer();
 }
-
 //called from warmth button, warmth val is controlled by warS slider
 //increases r and decreases b by 'warmth' value. Positives values warm image, negative cool image
 //from - https://tannerhelland.com/2014/07/01/simple-algorithms-adjusting-image-temperature-tint.html
@@ -790,7 +774,6 @@ function warmth() {
     currentBuffer = imageData;
     drawBuffer();
 }
-
 //called from tint button, tint val is controlled by tinS slider
 //increases g by tint value. Positives values tint (green), negative values de-tint (megenta)
 //from - https://tannerhelland.com/2014/07/01/simple-algorithms-adjusting-image-temperature-tint.html
@@ -804,7 +787,6 @@ function tint() {
     currentBuffer = imageData;
     drawBuffer();
 }
-
 //called by saturation button, saturation val is controlled by satS slider
 //modifies r,g,b values with given saturation value. 0 is greyscale, 1 is no change, 2 is double contrast
 //from - http://alienryderflex.com/saturation.html
@@ -860,7 +842,6 @@ function flip(direction) {
     currentBuffer = imageData;
     drawBuffer();
 }
-
 function rotate(degree) {
     var swapWH = (degree != 180); //if degree is 180, don't swap, otherwise, swap height and width
     var oldImageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
@@ -905,6 +886,23 @@ function rotate(degree) {
 function getPixel(x, y, width) {
     var red = y * (width * 4) + x * 4;
     return [red, red + 1, red + 2, red + 3];
+}
+
+/*
+	this function just returns a random string containg a path to an image file
+
+	called at the start of the program to grab a preset
+*/
+function randomPreset() {
+	var option = Math.floor(Math.random() * 4);
+	if (option == 0)
+		return 'Presets/Cat.jpg';
+	if (option == 1)
+		return 'Presets/CATT.jpg';
+	if (option == 2)
+		return 'Presets/earth.png';
+    if (option == 3)
+        return 'Presets/monalisa.jpg'
 }
 
 var effectIntensity; //setting the default effectIntensity
