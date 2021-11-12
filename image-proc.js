@@ -627,7 +627,7 @@ function brush(x, y, radious) {
     //this function just switches between the brush aux functions
     var color = hexToRgb(document.getElementById('bColor').value);
     var opacity = parseInt(document.getElementById('opB').value) / 100;
-    var strokeStyle = rgbaToStrokeStyle(color.r, color.b, color.g, opacity);
+    var strokeStyle = rgbaToStrokeStyle(color.r, color.g, color.b, opacity);
     switch (active_brush) {
     case brushSet.PENCIL:
         pencil(x, y, radious, strokeStyle);
@@ -708,7 +708,7 @@ function pen(x, y, radious, style) {
     context2d.stroke();
   }
 }
-function hatching(x, y, color, opacity) {
+function hatching(x, y, style) {
   let speed = Math.abs(x - brushCache.x) + Math.abs(y - brushCache.y); //the speed determines the size
 
   const lerps = 16; //lerps are linear interpolations, so this is the amount of them we are doing
