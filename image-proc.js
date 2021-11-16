@@ -806,12 +806,12 @@ function saturation() {
 
 
 //this functions flip the image by iterating through each pixel, and swapping that pixel with the pixel accros the axis (x or y) depending on whether direction is 'horizontal' or 'vertical'
-function flip(direction) {
+function flipI(direction) {
     var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
     switch(direction) {
-    case "horizontal":
+    case 'h':
         for (var y = 0; y < imageData.height; y += 1) {
             for (var x = 0; x < Math.floor(imageData.width / 2); x += 1) {
                 var left = getPixel(x, y, imageData.width); //left pixel data
@@ -823,7 +823,7 @@ function flip(direction) {
             }
         }
         break;
-    case "vertical":
+    case 'v':
         for (var x = 0; x < imageData.width; x += 1) {
             for (var y = 0; y < Math.floor(imageData.height / 2); y += 1) {
                 var top = getPixel(x, y, imageData.width); //top pixel data
