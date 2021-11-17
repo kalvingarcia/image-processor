@@ -40,6 +40,10 @@
 <div style="overflow:auto">
   <div class="menu">
     <a>
+        <button type = "button" id = "undo" onclick = "C.Undo();">Undo</button>
+        <button type = "button" id = "redo" onclick = "C.Redo()">Redo</button>
+    </a>
+    <a>
         <span> Color Filter </span>
         <input type = "color" id = "sColor">
         Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opS" onchange = "document.getElementById('opacity').innerHTML = this.value;">
