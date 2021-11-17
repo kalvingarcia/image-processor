@@ -49,7 +49,7 @@ class Change {
         this.list.splice(1);
         this.Update()
     }
-    Clear() { //empty change and reset it
+    Empty() { //empty change and reset it
         this.it = 0;
         this.list.splice(0);
     }
