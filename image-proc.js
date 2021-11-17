@@ -162,16 +162,22 @@ function download() {
 
 	check individual comments for more information
 */
+
 function onMouseOut(event) {
     if (!currentBuffer) { //if the buffer doesnt have a value exit
         return;
     }
     if(mouse_down) {
+        validToolSet = new Set([toolID.LIQUIFY, toolID.SWIRL, toolID.BRUSH]); //this is the set of IDs of tools that use mouseOut
+        if(!validToolSet.has(active_tool))
+            return;
+
         drawBuffer(); //otherwise update the buffer
         var image = new Image(); image.src = canvas.toDataURL();
         C.Add(image);
     }
 }
+
 function onMouseWheel(event) {
     if (!currentBuffer) { //no value, exit
         return;
@@ -285,6 +291,9 @@ function onMouseDown(event) {
 function onMouseUp(event) {
     mouse_down = false;
     liquify_time = 0;
+    validToolSet = new Set([toolID.LIQUIFY, toolID.SWIRL, toolID.BRUSH]); //this is the set of IDs of tools that use mouseOut
+    if(!validToolSet.has(active_tool))
+        return;
     var image = new Image(); image.src = canvas.toDataURL();
     C.Add(image);
 }
@@ -396,10 +405,16 @@ const brushSet = {
 	These are called by their respective buttons in the html file
 */
 function toggleTool(ID) {
-  active_tool = active_tool == ID ? toolID.NONE : ID;
+    active_tool = active_tool == ID ? toolID.NONE : ID;
 }
 function setBrush(ID) {
-  active_brush = active_brush == ID ? brushSet.NONE : ID;
+    if(active_brush == ID && active_tool == toolID.BRUSH) {
+        active_brush = brushSet.NONE;
+        active_tool = toolID.NONE;
+        return;
+    }
+    active_tool = toolID.BRUSH;
+    active_brush = ID;
 }
 
 
