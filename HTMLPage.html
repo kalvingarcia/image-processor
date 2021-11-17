@@ -40,6 +40,7 @@
 <div style="overflow:auto">
   <div class="menu">
     <a>
+        <button type = "button" id = "reset" onclick = "C.Reset();">Reset</button>
         <button type = "button" id = "undo" onclick = "C.Undo();">Undo</button>
         <button type = "button" id = "redo" onclick = "C.Redo()">Redo</button>
     </a>
@@ -85,8 +86,11 @@
     <a><h2>Tools</h2></a>
     <a><button onclick="toggleTool(0)">None</button><br></a>
     <a><button onclick="toggleTool(2)">Liquify Tool</button><br></a>
-    <a><button onclick="toggleTool(1)">Swirl Tool</button><br>
-    Swirl Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br></a>
+    <a>
+        <button onclick="toggleTool(1)">Swirl Tool</button><br>
+        Swirl Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br>
+        <button onclick = "swirlDirection *= -1;">Toggle Swirl Direction</button>
+    </a>
     <a><button onclick="toggleTool(3)">Color Pick</button><br>
     Selected Color: <div align="center" class="color-cell" id="selected-color"></div></a>
     <a>

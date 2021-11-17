@@ -44,9 +44,14 @@ class Change {
         context2d.drawImage(image, 0, 0);
         currentBuffer = context2d.getImageData(0, 0, image.width, image.height); 
     }
+    Reset() {
+        this.it = 1;
+        this.list.splice(1);
+        this.Update()
+    }
     Clear() { //empty change and reset it
         this.it = 0;
-        this.split(0);
+        this.list.splice(0);
     }
     Undo() { //moves it to previous change
         if(this.it > 1) {
@@ -546,6 +551,8 @@ function liquify(sourceImgData, x, y, radious) {
 
     copyImageData(dstPixels, srcPixels, width, height);
 }
+
+var swirlDirection = 1;
 function swirl(sourceImgData, x, y, radious) {
   var sourcePosition, destPosition;
 
@@ -575,6 +582,7 @@ function swirl(sourceImgData, x, y, radious) {
   var offsetX, offsetY;
   var x, y, i;
 
+
   for(i = 0; i < 30; ++i) {
     //Iterate over the interest square region
     for (y = -radious; y < radious; ++y) {
@@ -599,7 +607,7 @@ function swirl(sourceImgData, x, y, radious) {
           //converting radians to degrees
           degrees = (alpha * 180.0) / Math.PI;
 					//add a change based on the distance from the center (this is the swirl formula)
-          degrees += r * i * (effectIntensity / 20);
+          degrees += swirlDirection * (radious - r) * i * (effectIntensity / 20);
 
           //Transform back from polar coordinates to Cartesian
           alpha = (degrees * Math.PI) / 180.0;
