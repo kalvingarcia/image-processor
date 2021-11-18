@@ -33,9 +33,10 @@
 .dropbtn {
   background-color: #04AA6D;
   color: white;
-  padding: 16px;
+  padding: 8px 8px;
   font-size: 16px;
   border: none;
+  width: 80px;
 }
 
 /* The container <div> - needed to position the dropdown content */
@@ -49,15 +50,15 @@
   display: none;
   position: absolute;
   background-color: #f1f1f1;
-  min-width: 160px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
+  width: 80px;
 }
 
 /* Links inside the dropdown */
 .dropdown-content b {
   color: black;
-  padding: 12px 16px;
+  padding: 4px 16px;
   text-decoration: none;
   display: block;
 }
@@ -120,8 +121,8 @@
     </a>
   </div>
   <div class="main">
-    <canvas width="400" height="300" id="canvas1" style="border: 1px solid blue; display:block; margin-left: auto; margin-right: auto;">sorry, no canvas, please, upgrade your browser</canvas>
-    Select an image to work with: <input type="file" name="pic" onclick="this.value=null;" onchange="loadImage(this)" accept="image/*">
+    <canvas width="400" height="300" id="canvas1" style="border: 1px solid white; display:block; margin-left: auto; margin-right: auto;">sorry, no canvas, please, upgrade your browser</canvas>
+    <input type="file" id = "pic" name="pic" onclick="this.value=null;" onchange="loadImage(this)" accept="image/*" hidden>
   </div>
 
   <div class="menu">
@@ -138,13 +139,13 @@
     <a>
         <input type = "color" id = "bColor"><br>
         <div class="dropdown">
-          <button class="dropbtn">Brushes</button>
+          <button class="dropbtn" id = "bButton">Brushes</button>
           <div class="dropdown-content">
-            <b onclick="setBrush(1); toggleMenu(0)">Pencil Brush</b>
-            <b onclick="setBrush(2); toggleMenu(2)">Marker Brush</b>
-            <b onclick="setBrush(3); toggleMenu(3)">Pearl Brush</b>
-            <b onclick="setBrush(5); toggleMenu(0)">Pen Brush</b>
-            <b onclick="setBrush(6); toggleMenu(6)">Hatch Brush</b>
+            <b onclick="setBrush(1); toggleMenu(0);">Pencil</b>
+            <b onclick="setBrush(2); toggleMenu(2)">Marker</b>
+            <b onclick="setBrush(3); toggleMenu(3)">Pearl</b>
+            <b onclick="setBrush(5); toggleMenu(0)">Pen</b>
+            <b onclick="setBrush(6); toggleMenu(6)">Hatch</b>
           </div>
         </div><br>
         <div id="markermenu" style="display: none;">
@@ -163,16 +164,16 @@
     <a>
         <button onclick = "flipI('v')"> Flip vertical </button>
         <button onclick = "flipI('h')"> Flip horizontal </button>
-        <button onclick = "rotate(90)"> Rotate Right 90� </button>
-        <button onclick = "rotate(-90)"> Rotate Left 90� </button>
-        <button onclick = "rotate(180)"> Rotate 180� </button>
+        <button onclick = "rotate(90)"> Rotate Right 90 Degrees</button>
+        <button onclick = "rotate(-90)"> Rotate Left 90 Degrees</button>
+        <button onclick = "rotate(180)"> Rotate 180 Degrees</button>
     </a>
-    <a><button onclick="download()">Download Image</button></a>
+    <a>
+        <button onclick = "document.getElementById('pic').click();">Upload Image</button>
+        <button onclick="download()">Download Image</button>
+    </a>
   </div>
-  <div style="text-align: center">Select your tool by clicking on it, then click the picture to apply the tool.</div>
 </div>
-
-<div style="background-color:#4d4d4d;text-align:center;padding:10px;margin-top:7px;">made by Team the Team</div>
 
 <script src="image-proc.js"></script>
 </body>

@@ -1009,15 +1009,9 @@ function getPixel(x, y, width) {
 	called at the start of the program to grab a preset
 */
 function randomPreset() {
-	var option = Math.floor(Math.random() * 4);
-	if (option == 0)
-		return 'Presets/Cat.jpg';
-	if (option == 1)
-		return 'Presets/CATT.jpg';
-	if (option == 2)
-		return 'Presets/earth.png';
-    if (option == 3)
-        return 'Presets/monalisa.jpg'
+    var options = ['Presets/Cat.jpg', 'Presets/earth.png', 'Presets/monalisa.jpg'];
+    var ran = Math.floor(Math.random() * options.length);
+    return options[ran];
 }
 
 function toggleMenu(ID) {
