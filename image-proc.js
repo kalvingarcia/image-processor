@@ -94,7 +94,7 @@ function onloadImage(file) {
 		//setting the image data into the buffer that will be draw everytime there is a modification
 		currentBuffer = context2d.getImageData(0, 0, img.width, img.height);
         C.Empty();
-        C.Add(image);
+        C.Add(img);
 	}
 }
 /*
@@ -168,6 +168,14 @@ function onMouseOut(event) {
         if(!validToolSet.has(active_tool))
             return;
 
+        mouse_down = false;
+        if(active_tool == toolID.BRUSH) {
+          var rect = canvas.getBoundingClientRect(); //check within the bounds of the canvas
+          var x = (event.clientX - rect.left) | 0;
+          var y = (event.clientY - rect.top) | 0;
+          brush(x, y);
+        }
+
         drawBuffer(); //otherwise update the buffer
         var image = new Image(); image.src = canvas.toDataURL();
         C.Add(image);
@@ -196,12 +204,29 @@ function onMouseWheel(event) {
     }
 
 		//checking the tool bounds
-    if (toolRadious < MIN_TOOL_RADIOUS) {
-        toolRadious = MIN_TOOL_RADIOUS;
+    if(active_tool == toolID.BRUSH && active_brush == brushSet.PENCIL) {
+      if (toolRadious < MIN_PENCIL_RADIOUS) {
+          toolRadious = MIN_PENCIL_RADIOUS;
+      }
+      if (toolRadious > MAX_PENCIL_RADIOUS) {
+          toolRadious = MAX_PENCIL_RADIOUS;
+      }
+    } else if(active_tool == toolID.BRUSH && active_brush == brushSet.PEN) {
+      if (toolRadious < MIN_PEN_RADIOUS) {
+          toolRadious = MIN_PEN_RADIOUS;
+      }
+      if (toolRadious > MAX_PEN_RADIOUS) {
+          toolRadious = MAX_PEN_RADIOUS;
+      }
+    } else {
+      if (toolRadious < MIN_TOOL_RADIOUS) {
+          toolRadious = MIN_TOOL_RADIOUS;
+      }
+      if (toolRadious > MAX_TOOL_RADIOUS) {
+          toolRadious = MAX_TOOL_RADIOUS;
+      }
     }
-    if (toolRadious > MAX_TOOL_RADIOUS) {
-        toolRadious = MAX_TOOL_RADIOUS;
-    }
+
 
 		//we have to draw the tool on the canvas
     drawTool(event.clientX, event.clientY);
@@ -301,7 +326,7 @@ function onMouseUp(event) {
 	there may be a more efficient way to handle this drawing part though
 */
 function drawTool(clientX, clientY, hovered) {
-    validToolSet = new Set([toolID.LIQUIFY, toolID.SWIRL, toolID.PICK] ); //this is the set of IDs that will draw a circle on the mouse pointer
+    validToolSet = new Set([toolID.LIQUIFY, toolID.SWIRL, toolID.PICK, toolID.BRUSH] ); //this is the set of IDs that will draw a circle on the mouse pointer
     if(!validToolSet.has(active_tool))
         return;
     var rect = canvas.getBoundingClientRect(); //checking if within canvas
@@ -313,11 +338,11 @@ function drawTool(clientX, clientY, hovered) {
     if(active_tool != toolID.PICK) { //if we are not color picking
 	    //we draw a circle centered on the mouse
 	    context2d.beginPath();
-        context2d.arc(x, y, toolRadious, 0, 2 * Math.PI, false);
-        context2d.lineWidth = 1;
-        context2d.strokeStyle = '#0000fa';
-        context2d.closePath();
-        context2d.stroke();
+      context2d.arc(x, y, toolRadious, 0, 2 * Math.PI, false);
+      context2d.lineWidth = 1;
+      context2d.strokeStyle = '#0000fa';
+      context2d.closePath();
+      context2d.stroke();
     } else { //if we are color picking
 			//we draw an offset circle with a larger stroke and filled with the color hovered
 	    context2d.beginPath();
@@ -443,7 +468,7 @@ function truncate(input) {
   the lerp function returns a position based on a ratio and distance
 */
 function lerp(init, final, ratio) {
-  return init + Math.sqrt(Math.pow(final - init, 2)) * ratio
+  return init + (final - init) * ratio
 }
 function rgbaToStrokeStyle(r,g,b,a) {
   return "rgba(" + r + "," + g + "," + b + "," + a + ")";
@@ -694,8 +719,20 @@ function colorFilter() {
 function brush(x, y, radious) {
     //this function just switches between the brush aux functions
     var color = hexToRgb(document.getElementById('bColor').value);
-    var opacity = parseInt(document.getElementById('opB').value) / 100;
-    var strokeStyle = rgbaToStrokeStyle(color.r, color.g, color.b, opacity);
+    switch(active_brush) {
+      case brushSet.MARKER:
+        var opacity = parseInt(document.getElementById('opB').value) / 100;
+        break;
+      case brushSet.PEARL:
+        var opacity = parseInt(document.getElementById('opC').value) / 100;
+        break;
+      case brushSet.HATCH:
+        var opacity = parseInt(document.getElementById('opD').value) / 100;
+        break;
+      default:
+        var opacity = 1;
+    } var strokeStyle = rgbaToStrokeStyle(color.r, color.g, color.b, opacity);
+
     switch (active_brush) {
     case brushSet.PENCIL:
         pencil(x, y, radious, strokeStyle);
@@ -769,7 +806,7 @@ function pen(x, y, radious, style) {
     context2d.beginPath();
     context2d.moveTo(lerpX + radious, lerpY + radious);
     context2d.strokeStyle = style;
-    context2d.lineWidth = 5;
+    context2d.lineWidth = 1;
     context2d.lineTo(lerpX - radious, lerpY - radious);
     context2d.stroke();
   }
@@ -788,7 +825,7 @@ function hatching(x, y, style) {
     context2d.beginPath();
     context2d.moveTo(lerpX - (y - brushCache.y), lerpY - (x - brushCache.x));
     context2d.strokeStyle = style; //i want the color to match the pickedColor essentially
-    context2d.lineWidth = 5;
+    context2d.lineWidth = 1;
     context2d.lineTo(lerpX + (y - brushCache.y), lerpY + (x - brushCache.x));
     context2d.stroke();
   }
@@ -983,18 +1020,60 @@ function randomPreset() {
         return 'Presets/monalisa.jpg'
 }
 
-
+function toggleMenu(ID) {
+  var markermenu = document.getElementById("markermenu");
+  var pearlmenu = document.getElementById("pearlmenu");
+  var hatchmenu = document.getElementById("hatchmenu");
+  switch (ID) {
+    case brushSet.MARKER:
+      if (markermenu.style.display == "none") {
+        markermenu.style.display = "block";
+        pearlmenu.style.display = "none";
+        hatchmenu.style.display = "none";
+      } else {
+        markermenu.style.display = "none";
+      }
+      break;
+    case brushSet.PEARL:
+      if (pearlmenu.style.display == "none") {
+        pearlmenu.style.display = "block";
+        markermenu.style.display = "none";
+        hatchmenu.style.display = "none";
+      } else {
+        pearlmenu.style.display = "none";
+      }
+      break;
+    case brushSet.HATCH:
+      if (hatchmenu.style.display == "none") {
+        hatchmenu.style.display = "block";
+        pearlmenu.style.display = "none";
+        markermenu.style.display = "none";
+      } else {
+        hatchmenu.style.display = "none";
+      }
+      break;
+    default:
+      hatchmenu.style.display = "none";
+      pearlmenu.style.display = "none";
+      markermenu.style.display = "none";
+  }
+}
 
 let C = new Change();
+
+const MIN_TOOL_RADIOUS = 10; //setting min tool size
+const MAX_TOOL_RADIOUS = 80; //setting the max tool size
+const MIN_PENCIL_RADIOUS = 1;
+const MAX_PENCIL_RADIOUS = 10;
+const MIN_PEN_RADIOUS = 5;
+const MAX_PEN_RADIOUS = 25;
+var toolRadious = 30; //default tool radius
 
 var effectIntensity; //setting the default effectIntensity
 var canvasId = 'canvas1'; //this is the canvas ID
 var currentBuffer;
-var toolRadious = 30; //default tool radius
 var canvas = document.getElementById(canvasId); //we are just grabbing canvas based on ID
 var context2d = canvas.getContext('2d'); //grabbing the context
-const MIN_TOOL_RADIOUS = 10; //setting min tool size
-const MAX_TOOL_RADIOUS = 80; //setting the max tool size
 var mouse_down = false; //this is a bool for dragging!
 var liquify_time = 0; //this is a count for dragging liquify, essentially a timer
 var brushCache = new BrushCache();

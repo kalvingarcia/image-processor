@@ -29,6 +29,48 @@
   text-align: center;
 }
 
+/* Dropdown Button */
+.dropbtn {
+  background-color: #04AA6D;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content b {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content b:hover {background-color: #ddd;}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {display: block;}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+
 </style>
 </head>
 <body style="font-family:Helvetica;color:#aaaaaa;background-color:#000000">
@@ -81,7 +123,7 @@
     <canvas width="400" height="300" id="canvas1" style="border: 1px solid blue; display:block; margin-left: auto; margin-right: auto;">sorry, no canvas, please, upgrade your browser</canvas>
     Select an image to work with: <input type="file" name="pic" onclick="this.value=null;" onchange="loadImage(this)" accept="image/*">
   </div>
-  
+
   <div class="menu">
     <a><h2>Tools</h2></a>
     <a><button onclick="toggleTool(0)">None</button><br></a>
@@ -95,20 +137,35 @@
     Selected Color: <div align="center" class="color-cell" id="selected-color"></div></a>
     <a>
         <input type = "color" id = "bColor"><br>
-        Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opB" onchange = "document.getElementById('opacityB').innerHTML = this.value / 100;">
-        <span id="opacityB">0</span>
-        <button onclick="setBrush(1)">Pencil Brush</button><br>
-        <button onclick="setBrush(2)">Marker Brush</button><br>
-        <button onclick="setBrush(3)">Pearl Brush</button><br>
-        <button onclick="setBrush(5)">Pen Brush</button><br>
-        <button onclick="setBrush(6)">Hatch Brush</button><br>
+        <div class="dropdown">
+          <button class="dropbtn">Brushes</button>
+          <div class="dropdown-content">
+            <b onclick="setBrush(1); toggleMenu(0)">Pencil Brush</b>
+            <b onclick="setBrush(2); toggleMenu(2)">Marker Brush</b>
+            <b onclick="setBrush(3); toggleMenu(3)">Pearl Brush</b>
+            <b onclick="setBrush(5); toggleMenu(0)">Pen Brush</b>
+            <b onclick="setBrush(6); toggleMenu(6)">Hatch Brush</b>
+          </div>
+        </div><br>
+        <div id="markermenu" style="display: none;">
+          Opacity: <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opB" onchange = "document.getElementById('opacityB').innerHTML = this.value / 100;">
+          <span id="opacityB">1</span><br>
+        </div>
+        <div id="pearlmenu" style="display: none;">
+          Opacity: <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opC" onchange = "document.getElementById('opacityC').innerHTML = this.value / 100;">
+          <span id="opacityC">1</span><br>
+        </div>
+        <div id="hatchmenu" style="display: none;">
+          Opacity: <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opD" onchange = "document.getElementById('opacityD').innerHTML = this.value / 100;">
+          <span id="opacityD">1</span><br>
+        </div>
     </a>
     <a>
         <button onclick = "flipI('v')"> Flip vertical </button>
         <button onclick = "flipI('h')"> Flip horizontal </button>
-        <button onclick = "rotate(90)"> Rotate Right 90° </button>
-        <button onclick = "rotate(-90)"> Rotate Left 90° </button>
-        <button onclick = "rotate(180)"> Rotate 180° </button>
+        <button onclick = "rotate(90)"> Rotate Right 90ï¿½ </button>
+        <button onclick = "rotate(-90)"> Rotate Left 90ï¿½ </button>
+        <button onclick = "rotate(180)"> Rotate 180ï¿½ </button>
     </a>
     <a><button onclick="download()">Download Image</button></a>
   </div>
