@@ -40,6 +40,11 @@
 <div style="overflow:auto">
   <div class="menu">
     <a>
+        <button type = "button" id = "reset" onclick = "C.Reset();">Reset</button>
+        <button type = "button" id = "undo" onclick = "C.Undo();">Undo</button>
+        <button type = "button" id = "redo" onclick = "C.Redo()">Redo</button>
+    </a>
+    <a>
         <span> Color Filter </span>
         <input type = "color" id = "sColor">
         Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opS" onchange = "document.getElementById('opacity').innerHTML = this.value;">
@@ -81,12 +86,14 @@
     <a><h2>Tools</h2></a>
     <a><button onclick="toggleTool(0)">None</button><br></a>
     <a><button onclick="toggleTool(2)">Liquify Tool</button><br></a>
-    <a><button onclick="toggleTool(1)">Swirl Tool</button><br>
-    Swirl Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br></a>
+    <a>
+        <button onclick="toggleTool(1)">Swirl Tool</button><br>
+        Swirl Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br>
+        <button onclick = "swirlDirection *= -1;">Toggle Swirl Direction</button>
+    </a>
     <a><button onclick="toggleTool(3)">Color Pick</button><br>
     Selected Color: <div align="center" class="color-cell" id="selected-color"></div></a>
     <a>
-        <button onclick="toggleTool(5)">Brush Tool</button>
         <input type = "color" id = "bColor"><br>
         Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opB" onchange = "document.getElementById('opacityB').innerHTML = this.value / 100;">
         <span id="opacityB">0</span>
@@ -97,8 +104,8 @@
         <button onclick="setBrush(6)">Hatch Brush</button><br>
     </a>
     <a>
-        <button onclick = "flip('vertical')"> Flip vertical </button>
-        <button onclick = "flip('horizontal')"> Flip horizontal </button>
+        <button onclick = "flipI('v')"> Flip vertical </button>
+        <button onclick = "flipI('h')"> Flip horizontal </button>
         <button onclick = "rotate(90)"> Rotate Right 90° </button>
         <button onclick = "rotate(-90)"> Rotate Left 90° </button>
         <button onclick = "rotate(180)"> Rotate 180° </button>
