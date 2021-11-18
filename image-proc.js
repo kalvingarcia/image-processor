@@ -959,15 +959,12 @@ function rotate(degree) {
     drawBuffer(); //apply new image
     var image = new Image(); image.src = canvas.toDataURL();
     C.Add(image);
-<<<<<<< HEAD
 }
 
 //gets pixelData give a distance x from the left, a distance y from the top, and a width of width. Returns data in form of [red, green, blue, alpha]
 function getPixel(x, y, width) {
     var red = y * (width * 4) + x * 4;
     return [red, red + 1, red + 2, red + 3];
-=======
->>>>>>> 4944b0f2f89d002c6f76f49eb5194e9c9fce07aa
 }
 
 /*
@@ -989,17 +986,6 @@ function randomPreset() {
 
 
 let C = new Change();
-<<<<<<< HEAD
-=======
-
-var effectIntensity; //setting the default effectIntensity
-var canvasId = 'canvas1'; //this is the canvas ID
-var currentBuffer;
-var toolRadious = 30; //default tool radius
-var canvas = document.getElementById(canvasId); //we are just grabbing canvas based on ID
-var context2d = canvas.getContext('2d'); //grabbing the context
-var currentBuffer;
->>>>>>> 4944b0f2f89d002c6f76f49eb5194e9c9fce07aa
 
 var effectIntensity; //setting the default effectIntensity
 var canvasId = 'canvas1'; //this is the canvas ID
