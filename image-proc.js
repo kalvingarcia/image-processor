@@ -1,8 +1,6 @@
 /*
 	This is the Script File containing the liquify, swirl, and color pick tools
-
 	It also contains auxillary functions to aid in making them work
-
 	This code was made using source code from:
 		geek_office_dog@blog (their hello swirl and hello swirl 2 tutorials)
 			links - https://geekofficedog.blogspot.com/2015/01/liquify-effect-hello-swirl-2.html?m=1
@@ -19,10 +17,52 @@
             from - https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 */
 
-//This class is used to keep track of the mouse's previous position for brush drawing
+/*
+  This class is used to keep track of the mouse's previous position for brush drawing
+*/
 class BrushCache {
   x;
   y;
+}
+
+class Change {
+    constructor() {
+        this.list = new Array();
+        this.it = 0;
+    }
+    Add(image) { //do Add(image) when you want to save a change made by a function. When index isn't newest change, delete all changes after that
+        this.list.splice(this.it);
+        this.list.push(image);
+        this.it++; console.log(this.list);
+    }
+    Update() { //called when you want to update canvas to this.list[this.it] (most recent change)
+        let image = this.list[this.it - 1];
+        canvas.width = image.width;
+        canvas.height = image.height;
+        context2d.drawImage(image, 0, 0);
+        currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
+    }
+    Reset() {
+        this.it = 1;
+        this.list.splice(1);
+        this.Update()
+    }
+    Empty() { //empty change and reset it
+        this.it = 0;
+        this.list.splice(0);
+    }
+    Undo() { //moves it to previous change
+        if(this.it > 1) {
+            this.it--;
+        }
+        this.Update()
+    }
+    Redo() { //moves it to next change
+        if(this.it < this.list.length) {
+            this.it++;
+        }
+        this.Update();
+    }
 }
 
 //This function tests an image's size against the size of the page.
@@ -61,7 +101,6 @@ function onloadImage(file) {
 	This function is similar to the onloadImage function
 	the difference comes from the fact that the files are uploaded
 	the function is called by the html file
-
 	again, could be improved by fitting to the screen
 */
 function loadImage(src){
@@ -102,7 +141,7 @@ function loadImage(src){
     };
     reader.readAsDataURL(src.files[0]);
 }
-//This function downloads the current image.
+//    This function downloads the current image.
 function download() {
     window.open(canvas.toDataURL('image/png'));
     var gh = canvas.toDataURL('png');
@@ -117,7 +156,6 @@ function download() {
 /*
 	This group of function are the event handlers
 	They all mostly do the same thing but for different events
-
 	check individual comments for more information
 */
 
@@ -260,7 +298,6 @@ function onMouseUp(event) {
 /*
 	This function draws the tool based on the mouse pos
 	it also has a rgba value input for the color picker
-
 	there may be a more efficient way to handle this drawing part though
 */
 function drawTool(clientX, clientY, hovered) {
@@ -302,12 +339,6 @@ function drawPixels(canvasId, imageData) {
     context2d.putImageData(imageData, 0, 0);
 }
 
-//gets pixelData give a distance x from the left, a distance y from the top, and a width of width. Returns data in form of [red, green, blue, alpha]
-function getPixel(x, y, width) {
-    var red = y * (width * 4) + x * 4;
-    return [red, red + 1, red + 2, red + 3];
-}
-
 /*
 	Copy the pixels of the 'srcPixels' ImageData parameter
 	into the 'dstPixels' parameter
@@ -347,17 +378,6 @@ const toolID = {
   BRUSH: 5,
 }
 /*
-	These next function just toggles the tools
-    If the selected tool is current active (toolID is equal to the ID of the tool we are toggling) turn it off, and set tool to none (toolID = 0)
-    (none == 0, swirl == 1, liquify == 2, clor pick == 3)
-    If the selected tool is equal to anything else, switch to the new tool. (set toolID to the ID of the tool we are toggling)
-	These are called by their respective buttons in the html file
-*/
-function toggleTool(ID) {
-  active_tool = active_tool == ID ? toolID.NONE : ID;
-}
-
-/*
   Here is an enumeration of the brushes!
   As more brushes get added, please add them to this enum!
 */
@@ -371,12 +391,17 @@ const brushSet = {
   HATCH: 6,
   SPRAY: 7,
 }
+
 /*
-	These next function just toggles the brushes
-    If the selected brush is current active (brushSet is equal to the ID of the brush we are toggling) turn it off, and set tool to none (brushSet = 0)
-    (none == 0, pencil == 1, marker == 2, pearl == 3, pen == 4, hatching == 5)
-	 These are called by their respective buttons in the html file
+	These next function just toggles the tools
+    If the selected tool is current active (toolID is equal to the ID of the tool we are toggling) turn it off, and set tool to none (toolID = 0)
+    (none == 0, swirl == 1, liquify == 2, clor pick == 3)
+    If the selected tool is equal to anything else, switch to the new tool. (set toolID to the ID of the tool we are toggling)
+	These are called by their respective buttons in the html file
 */
+function toggleTool(ID) {
+    active_tool = active_tool == ID ? toolID.NONE : ID;
+}
 function setBrush(ID) {
     if(active_brush == ID && active_tool == toolID.BRUSH) {
         active_brush = brushSet.NONE;
@@ -426,14 +451,10 @@ function rgbaToStrokeStyle(r,g,b,a) {
 
 /*
 	These are the tools and features of the program
-
 	liquify: a tool that creates a bubbly effect on the brush
 		we should try making it able to be dragged
 	swirl: this tool literally swirls a portion of the image
 	pick: this is the color pick tool
-  filter: this function is called when the the filter button is pressed
-    It uses input from the four sliders next to the button to apply a filter.
-  brush: a tool to draw on the canvas baby!
 */
 function liquify(sourceImgData, x, y, radious) {
     var sourcePosition, destPosition;
@@ -675,46 +696,36 @@ function brush(x, y, radious) {
     var color = hexToRgb(document.getElementById('bColor').value);
     var opacity = parseInt(document.getElementById('opB').value) / 100;
     var strokeStyle = rgbaToStrokeStyle(color.r, color.g, color.b, opacity);
-
     switch (active_brush) {
-      case brushSet.PENCIL:
-          pencil(x, y, radious, strokeStyle);
-          break;
-      case brushSet.MARKER:
-          marker(x, y, radious, strokeStyle);
-          break;
-      case brushSet.PEARL:
-          pearl(x, y, strokeStyle);
-          break;
-      //case brushSet.WIGGLE:
-          //wiggle(x, y);
-          //break;
-      case brushSet.PEN:
-          pen(x, y, radious, strokeStyle);
-          break;
-      case brushSet.HATCH:
-          hatching(x, y, strokeStyle);
-          break;
-      //case brushSet.SPRAY:
-          //spray(x, y);
-          //break;
-      default:
-          console.log("ERROR: brushSet has invalid value.");
+    case brushSet.PENCIL:
+        pencil(x, y, radious, strokeStyle);
+        break;
+    case brushSet.MARKER:
+        marker(x, y, radious, strokeStyle);
+        break;
+    case brushSet.PEARL:
+        pearl(x, y, strokeStyle);
+        break;
+    //case brushSet.WIGGLE:
+        //wiggle(x, y);
+        //break;
+    case brushSet.PEN:
+        pen(x, y, radious, strokeStyle);
+        break;
+    case brushSet.HATCH:
+        hatching(x, y, strokeStyle);
+        break;
+    //case brushSet.SPRAY:
+        //spray(x, y);
+        //break;
+    default:
+        console.log("ERROR: brushSet has invalid value.")
     }
 
     //updating the buffer because otherwise it won't draw!
     currentBuffer = context2d.getImageData(0, 0, canvas.width, canvas.height);
 }
 
-/*
-  These are the brush auxillary functions, basically these do the actual work and brush just picks between them
-
-  pencil draws a stroke of toolradius wide
-  marker makes circles that should be slightly transparent, but I have yet to figure that one out
-  pearl makes circles too, but they are connected based on the mouse's distance from its previous point
-  pen is like a fountain pen, where its a flat line
-  hatching is pen, but angled based on the mouse's direction
-*/
 function pencil(x, y, radious, style) {
     //drawing the lines
     context2d.beginPath();
@@ -758,7 +769,7 @@ function pen(x, y, radious, style) {
     context2d.beginPath();
     context2d.moveTo(lerpX + radious, lerpY + radious);
     context2d.strokeStyle = style;
-    context2d.lineWidth = 3;
+    context2d.lineWidth = 5;
     context2d.lineTo(lerpX - radious, lerpY - radious);
     context2d.stroke();
   }
@@ -777,7 +788,7 @@ function hatching(x, y, style) {
     context2d.beginPath();
     context2d.moveTo(lerpX - (y - brushCache.y), lerpY - (x - brushCache.x));
     context2d.strokeStyle = style; //i want the color to match the pickedColor essentially
-    context2d.lineWidth = 1;
+    context2d.lineWidth = 5;
     context2d.lineTo(lerpX + (y - brushCache.y), lerpY + (x - brushCache.x));
     context2d.stroke();
   }
@@ -950,9 +961,14 @@ function rotate(degree) {
     C.Add(image);
 }
 
+//gets pixelData give a distance x from the left, a distance y from the top, and a width of width. Returns data in form of [red, green, blue, alpha]
+function getPixel(x, y, width) {
+    var red = y * (width * 4) + x * 4;
+    return [red, red + 1, red + 2, red + 3];
+}
+
 /*
 	this function just returns a random string containg a path to an image file
-
 	called at the start of the program to grab a preset
 */
 function randomPreset() {
@@ -977,27 +993,23 @@ var currentBuffer;
 var toolRadious = 30; //default tool radius
 var canvas = document.getElementById(canvasId); //we are just grabbing canvas based on ID
 var context2d = canvas.getContext('2d'); //grabbing the context
-var currentBuffer;
-
 const MIN_TOOL_RADIOUS = 10; //setting min tool size
 const MAX_TOOL_RADIOUS = 80; //setting the max tool size
-var effectIntensity; //setting the default effectIntensity
-var toolRadious = 30; //default tool radius
+var mouse_down = false; //this is a bool for dragging!
+var liquify_time = 0; //this is a count for dragging liquify, essentially a timer
+var brushCache = new BrushCache();
+var flip = 0;
+
+
+/*
+	This is a cell that holds the picked color
+	we can modify this so that we can display the current color for when we add a brush tool
+*/
+var pickedColor = document.getElementById('selected-color');
 var active_tool = toolID.NONE; //this is the active tool variable, set it using the enum created
 var active_brush = brushSet.NONE; //this is the active brush variable, set it using the enum created
 
 setEffectIntensity(40); //this is the default effectIntensity
-
-var mouse_down = false; //this is a bool for dragging!
-var liquify_time = 0; //this is a count for dragging liquify, essentially a timer
-var brushCache = new BrushCache();
-
-/*
-	This is a cell that holds the picked color
-
-	we can modify this so that we can display the current color for when we add a brush tool
-*/
-var pickedColor = document.getElementById('selected-color');
 
 //setting the initial image
 var imgSrc = randomPreset();
