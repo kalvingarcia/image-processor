@@ -13,8 +13,10 @@
             link - https://tannerhelland.com/2014/07/01/simple-algorithms-adjusting-image-temperature-tint.html
         alienryderflex.com (for saturation)
             link - http://alienryderflex.com/saturation.html
-    converts hexadecimal string to {r,g,b}
+        for converting hexadecimal string to {r,g,b}
             from - https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+        for bilinear resizing algorithm
+            https://chao-ji.github.io/jekyll/update/2018/07/19/BilinearResize.html
 */
 
 /*
@@ -66,15 +68,88 @@ class Change {
 }
 
 //This function tests an image's size against the size of the page.
-//If the image is in the bound, returns true/
-function imageIsValidSize(image) {
-    const max = .75; //max portion of window that image can take up
-    if(image.height <= window.screen.height * max && image.width <= window.screen.width * max) {
-        return true;
-    }
-    return false;
+//If the image is in bounds, do nothing,
+//otherwise, call billinear_resize function with new sizes multiplied by multi
+//multi, being the largest number that the image can be scaled by such that it fits in the bounds
+function shrinkToBounds() {
+    const max = .45; //max portion of window that image can take up
+    if(canvas.height < window.screen.height * max && canvas.width < window.screen.width * max)
+        return;
+    let multi = -1;
+    if(canvas.height / window.screen.height > canvas.width / window.screen.width)
+        multi = window.screen.height * max / canvas.height;
+    else
+        multi = window.screen.width * max / canvas.width;
+
+    bilinear_resize(canvas.height * multi, canvas.width * multi); console.log(canvas.height * multi, canvas.width * multi);
 }
 
+//Based on code from - https://chao-ji.github.io/jekyll/update/2018/07/19/BilinearResize.html
+//resizes image in canvas to height,width using bilinear interpolation
+function bilinear_resize(height, width) {
+    var imageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    var resized = context2d.createImageData(width, height);
+    const rData = resized.data;
+
+    var x_ratio = 0, y_ratio = 0;
+    if(width > 1)
+        x_ratio = (imageData.width - 1) / (width - 1);
+    if(height > 1)
+        y_ratio = (imageData.height - 1) / (height - 1);
+
+    for(let y = 0; y < height; ++y) {
+        for(let x = 0; x < width; ++x) {
+            let x_l = Math.floor(x_ratio * x);
+            let y_l = Math.floor(y_ratio * y);
+            let x_h = Math.ceil(x_ratio * x);
+            let y_h = Math.ceil(y_ratio * y);
+
+            let x_weight = (x_ratio * x) - x_l;
+            let y_weight = (y_ratio * y) - y_l;
+
+            let a = getPixel(x_l, y_l, imageData.width);
+            a = [data[a[0]], data[a[1]], data[a[2]], data[a[3]]];
+            let b = getPixel(x_h, y_l, imageData.width);
+            b = [data[b[0]], data[b[1]], data[b[2]], data[b[3]]];
+            let c = getPixel(x_l, y_h, imageData.width);
+            c = [data[c[0]], data[c[1]], data[c[2]], data[c[3]]];
+            let d = getPixel(x_h, y_h, imageData.width);
+            d = [data[d[0]], data[d[1]], data[d[2]], data[d[3]]];
+
+            let pixel = [
+                a[0] * (1 - x_weight) * (1 - y_weight) +
+                b[0] * x_weight * (1 - y_weight) +
+                c[0] * (1 - x_weight) * y_weight +
+                d[0] * x_weight * y_weight,
+                
+                a[1] * (1 - x_weight) * (1 - y_weight) +
+                b[1] * x_weight * (1 - y_weight) +
+                c[1] * (1 - x_weight) * y_weight +
+                d[1] * x_weight * y_weight,
+
+                a[2] * (1 - x_weight) * (1 - y_weight) +
+                b[2] * x_weight * (1 - y_weight) +
+                c[2] * (1 - x_weight) * y_weight +
+                d[2] * x_weight * y_weight,
+                    
+                a[3] * (1 - x_weight) * (1 - y_weight) +
+                b[3] * x_weight * (1 - y_weight) +
+                c[3] * (1 - x_weight) * y_weight +
+                d[3] * x_weight * y_weight,
+            ];
+            let newPixel = getPixel(x, y, resized.width)[0];
+            [rData[newPixel], rData[newPixel + 1], rData[newPixel + 2], rData[newPixel + 3]]
+            =
+            [pixel[0], pixel[1], pixel[2], pixel[3]];
+        }
+    }
+    canvas.width = resized.width; canvas.height = resized.height;
+    currentBuffer = resized;
+    drawBuffer();
+    var image = new Image(); image.src = canvas.toDataURL();
+    C.Add(image);
+}
 /*
 	This function onloads an image to the canvas using a preset from the directory
 	it is called upon website execution
@@ -93,6 +168,9 @@ function onloadImage(file) {
 		context2d.drawImage(img, 0, 0);
 		//setting the image data into the buffer that will be draw everytime there is a modification
 		currentBuffer = context2d.getImageData(0, 0, img.width, img.height);
+
+        shrinkToBounds();
+
         C.Empty();
         C.Add(img);
 	}
@@ -117,21 +195,19 @@ function loadImage(src){
         var image = new Image();
 			//similar concept to the onload function
         image.onload = function() {
-            if(!imageIsValidSize(image)) { //if imag doesn't fit in page according to this func, fail to upload image
-                alert('Image too large.');
-                console.log('Dropped an image that is too large to be used by canvas.');
-                return;
-            }
             // Adjust canvas size to the image dimensions
             canvas.width = image.width;
             canvas.height = image.height;
+            context2d.drawImage(image, 0, 0);
+            currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
+
+            shrinkToBounds();
 
             C.Empty();
             C.Add(image);
 
             //save a copy of loaded pixels
-            context2d.drawImage(image, 0, 0);
-            currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
+            
         }
         image.onerror = function() {
             alert('Not a valid image.');
