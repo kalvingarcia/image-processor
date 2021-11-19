@@ -126,6 +126,7 @@ function loadImage(src){
             canvas.width = image.width;
             canvas.height = image.height;
 
+            C.Empty();
             C.Add(image);
 
             //save a copy of loaded pixels
