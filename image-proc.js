@@ -1130,6 +1130,30 @@ function toggleMenu(ID) {
   }
 }
 
+function selectPreset() {
+
+  var imgSrc = document.getElementById('proImg').src  
+  onloadImage(imgSrc);
+}
+
+function selectPreset2() {
+
+  var imgSrc = document.getElementById('proImg2').src  
+  onloadImage(imgSrc);
+}
+
+function selectPreset3() {
+
+  var imgSrc = document.getElementById('proImg3').src  
+  onloadImage(imgSrc);
+}
+
+function selectPreset4() {
+
+  var imgSrc = document.getElementById('proImg4').src  
+  onloadImage(imgSrc);
+}
+
 let C = new Change();
 
 const MIN_TOOL_RADIOUS = 10; //setting min tool size
@@ -1165,6 +1189,13 @@ setEffectIntensity(40); //this is the default effectIntensity
 var imgSrc = randomPreset();
 onloadImage(imgSrc);
 
+var img = document.getElementById('proImg');
+var img2 = document.getElementById('proImg2');
+var img3 = document.getElementById('proImg3');
+var img4 = document.getElementById('proImg4');
+
+
+
 /*
 	This is the event listener that calls the functions for events
 */
@@ -1175,4 +1206,17 @@ if (canvas.addEventListener) {
     canvas.addEventListener('DOMMouseScroll', onMouseWheel, false);
     canvas.addEventListener('mousedown', onMouseDown, false);
     canvas.addEventListener('mouseup', onMouseUp, false);
+}
+
+if(img.addEventListener)  {
+  img.addEventListener('click',selectPreset)
+}
+if(img2.addEventListener)  {
+  img2.addEventListener('click',selectPreset2)
+}
+if(img3.addEventListener)  {
+  img3.addEventListener('click',selectPreset3)
+}
+if(img4.addEventListener)  {
+  img4.addEventListener('click',selectPreset4)
 }
