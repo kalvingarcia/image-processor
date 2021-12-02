@@ -1,10 +1,14 @@
 <!-- Uses repurposed code from https://www.w3schools.com/html/html_responsive.asp in order to make window responsive.-->
 <html>
 <head>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Outfit">
 <style>
 * {
   box-sizing: border-box;
+  border-radius: 10px;
+  font-family: "Outfit", sans-serif;
 }
+
 
 .menu {
   float: left;
@@ -74,7 +78,7 @@
 
 </style>
 </head>
-<body style="font-family:Helvetica;color:#aaaaaa;background-color:#000000">
+<body style="color:#aaaaaa;background-color:#000000">
 
 <div style="overflow:auto">
   <div class="menu">
@@ -119,16 +123,16 @@
       <div class="dropdown">
           <button class="dropbtn" id = "bButton">Presets</button>
           <div class="dropdown-content">
-              <img src="Presets/Cat.jpg" id ="proImg4" alt="" width= "60%">
-              <img src="Presets/earth.png" id ="proImg" alt="" width= "60%">
-              <img src="Presets/CATT.jpg" id ="proImg3" alt="" width= "60%">
-              <img src="Presets/monalisa.jpg" id ="proImg2" alt="" width= "60%">  
+              <img src="Presets/Cat.jpg" id ="proImg4" alt="" width= "60%" style="border-radius:0px">
+              <img src="Presets/earth.png" id ="proImg" alt="" width= "60%" style="border-radius:0px">
+              <img src="Presets/CATT.jpg" id ="proImg3" alt="" width= "60%" style="border-radius:0px">
+              <img src="Presets/monalisa.jpg" id ="proImg2" alt="" width= "60%" style="border-radius:0px">  
           </div>
         </div>
     </a>
   </div>
   <div class="main">
-    <canvas width="400" height="300" id="canvas1" style="border: 1px solid white; display:block; margin-left: auto; margin-right: auto;">sorry, no canvas, please, upgrade your browser</canvas>
+    <canvas width="400" height="300" id="canvas1" style="border: 1px solid white; display:block; margin-left: auto; margin-right: auto; border-radius: 0px">sorry, no canvas, please, upgrade your browser</canvas>
     <input type="file" id = "pic" name="pic" onclick="this.value=null;" onchange="loadImage(this)" accept="image/*" hidden>
   </div>
 
