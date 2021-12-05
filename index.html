@@ -1,14 +1,20 @@
 <!-- Uses repurposed code from https://www.w3schools.com/html/html_responsive.asp in order to make window responsive.-->
 <html>
 <head>
+<title>Team the Team Image Editor</title>
+<html lang="en">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Outfit">
 <style>
 * {
   box-sizing: border-box;
   border-radius: 10px;
   font-family: "Outfit", sans-serif;
+  color: white;
 }
 
+button {
+    background-color: black;
+}
 
 .menu {
   float: left;
@@ -88,35 +94,36 @@
         <button type = "button" id = "redo" onclick = "C.Redo()">Redo</button>
     </a>
     <a>
-        <span> Color Filter </span>
-        <input type = "color" id = "sColor">
-        Opacity: <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opS" onchange = "document.getElementById('opacity').innerHTML = this.value;">
-        <span id="opacity">0</span>
+        <label for="sColor">Color Filter</label><br>
+        <input type = "color" id = "sColor"> <br>
+        <label for="opS">Opacity</label>
+        <input type = "range" min = "0" max = "100" value = "0" class = "slider" id = "opS" onchange = "document.getElementById('opacity').innerHTML = this.value / 100;">
+        <span id="opacity">0</span> <br>
         <button type = "button" id = "filter" onclick = "colorFilter();">Apply</button>
     </a>
     <a>
-        <span>Brightness</span>
-        <input type = "range" min = "-128" max = "128" value = "0" class = "slider" id = "briS">
+        <label for="briS">Brightness</label>
+        <input type = "range" min = "-128" max = "128" value = "0" class = "slider" id = "briS"><br>
         <button type = "button" id = "filter" onclick = "brightness();">Apply</button>
     </a>
     <a>
-        <span>Contrast</span>
-        <input type = "range" min = "-128" max = "128" value = "0" class = "slider" id = "conS">
+        <label for="conS">Contrast</label>
+        <input type = "range" min = "-128" max = "128" value = "0" class = "slider" id = "conS"><br>
         <button type = "button" id = "filter" onclick = "contrast();">Apply</button>
     </a>
     <a>
-        <span>Warmth</span>
-        <input type = "range" min = "-20" max = "20" value = "0" class = "slider" id = "warS">
+        <label for="warS">Warmth</label>
+        <input type = "range" min = "-20" max = "20" value = "0" class = "slider" id = "warS"><br>
         <button type = "button" id = "filter" onclick = "warmth();">Apply</button>
     </a>
     <a>
-        <span>Tint</span>
-        <input type = "range" min = "-100" max = "100" value = "0" class = "slider" id = "tinS">
+        <label for="tinS">Tint</label>
+        <input type = "range" min = "-100" max = "100" value = "0" class = "slider" id = "tinS"><br>
         <button type = "button" id = "filter" onclick = "tint();">Apply</button>
     </a>
     <a>
-        <span>Saturation</span>
-        <input type = "range" min = "0.0" max = "20" value = "1" class = "slider" id = "satS">
+        <label for="satS">Saturation</label>
+        <input type = "range" min = "0.0" max = "20" value = "1" class = "slider" id = "satS"><br>
         <button type = "button" id = "filter" onclick = "saturation();">Apply</button>
     </a>
     <a>
@@ -142,12 +149,16 @@
     <a><button onclick="toggleTool(2)">Liquify Tool</button><br></a>
     <a>
         <button onclick="toggleTool(1)">Swirl Tool</button><br>
-        Swirl Intensity: <input type="range" min="1" max="100" value="40" onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br>
+        <label for="swiS">Swirl Intesity</label>
+        <input type="range" min="1" max="100" value="40" id = "swiS"onchange="setEffectIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br>
+
         <button onclick = "swirlDirection *= -1;">Toggle Swirl Direction</button>
     </a>
     <a><button onclick="toggleTool(3)">Color Pick</button><br>
-    Selected Color: <div align="center" class="color-cell" id="selected-color"></div></a>
+    <label for="selected-color">Selected Color:</label>
+    <div align="center" class="color-cell" id="selected-color"></div></a>
     <a>
+        <label for="bColor">Brush Color</label>
         <input type = "color" id = "bColor"><br>
         <div class="dropdown">
           <button class="dropbtn" id = "bButton">Brushes</button>
@@ -160,15 +171,18 @@
           </div>
         </div><br>
         <div id="markermenu" style="display: none;">
-          Opacity: <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opB" onchange = "document.getElementById('opacityB').innerHTML = this.value / 100;">
+          <label for="opB">Opacity</label>
+          <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opB" onchange = "document.getElementById('opacityB').innerHTML = this.value / 100;">
           <span id="opacityB">1</span><br>
         </div>
         <div id="pearlmenu" style="display: none;">
-          Opacity: <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opC" onchange = "document.getElementById('opacityC').innerHTML = this.value / 100;">
+          <label for="opC">Opacity</label>
+          <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opC" onchange = "document.getElementById('opacityC').innerHTML = this.value / 100;">
           <span id="opacityC">1</span><br>
         </div>
         <div id="hatchmenu" style="display: none;">
-          Opacity: <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opD" onchange = "document.getElementById('opacityD').innerHTML = this.value / 100;">
+          <label for="opD">Opacity</label>
+          <input type = "range" min = "0" max = "100" value = "100" class = "slider" id = "opD" onchange = "document.getElementById('opacityD').innerHTML = this.value / 100;">
           <span id="opacityD">1</span><br>
         </div>
     </a>
