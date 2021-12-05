@@ -519,8 +519,11 @@ function setBrush(ID) {
 	this function is used to set the intensity of the tool
 	it is called by the button in the html file
 */
-function setEffectIntensity(intensity) {
-    effectIntensity = (intensity / 10.0);
+function setSwirlIntensity(intensity) {
+    swirlIntensity = (intensity / 10.0);
+}
+function setLiquifyIntensity(intensity) {
+    liquifyIntensity = (intensity / 10.0);
 }
 /*
     this function is called when the the filter button is pressed
@@ -1164,7 +1167,8 @@ const MIN_PEN_RADIOUS = 5;
 const MAX_PEN_RADIOUS = 25;
 var toolRadious = 30; //default tool radius
 
-var effectIntensity; //setting the default effectIntensity
+var swirlIntensity;
+var liquifyIntensity;
 var canvasId = 'canvas1'; //this is the canvas ID
 var currentBuffer;
 var canvas = document.getElementById(canvasId); //we are just grabbing canvas based on ID
@@ -1183,7 +1187,8 @@ var pickedColor = document.getElementById('selected-color');
 var active_tool = toolID.NONE; //this is the active tool variable, set it using the enum created
 var active_brush = brushSet.NONE; //this is the active brush variable, set it using the enum created
 
-setEffectIntensity(40); //this is the default effectIntensity
+setSwirlIntensity(40); //this is the default effectIntensity
+setLiquifyIntensity(40);
 
 //setting the initial image
 var imgSrc = randomPreset();
