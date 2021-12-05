@@ -164,12 +164,12 @@ button {
     <a>
         <button onclick="toggleTool(2)">Liquify Tool</button><br>
         <label for="swiS">Liquify Intesity</label>
-        <input type="range" min="1" max="100" value="40" id = "swiS"onchange="setLiquifyIntensity(this.value); document.getElementById('liquifyIntensity').innerHTML=this.value;" /> <br>
+        <input type="range" min="1" max="100" value="40" id = "liquiS" onchange="setLiquifyIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br>
     </a>
     <a>
         <button onclick="toggleTool(1)">Swirl Tool</button><br>
         <label for="swiS">Swirl Intesity</label>
-        <input type="range" min="1" max="100" value="40" id = "swiS"onchange="setSwirlIntensity(this.value); document.getElementById('swirlIntensity').innerHTML=this.value;" /> <br>
+        <input type="range" min="1" max="100" value="40" id = "swiS" onchange="setSwirlIntensity(this.value); document.getElementById('intensity').innerHTML=this.value;" /> <br>
 
         <button onclick = "swirlDirection *= -1;">Toggle Swirl Direction</button>
     </a>
