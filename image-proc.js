@@ -617,7 +617,7 @@ function liquify(sourceImgData, x, y, radious) {
                 interpolationFactor = r / radious;
 
                 //Do the interpolation (this is the liquify formula)
-                r = interpolationFactor * r + (1.0 - interpolationFactor) * effectIntensity * Math.sqrt(r);
+                r = interpolationFactor * r + (1.0 - interpolationFactor) * liquifyIntensity * Math.sqrt(r);
 
                 //Transform back from polar coordinates to Cartesian
                 alpha = (degrees * Math.PI) / 180.0;
@@ -721,7 +721,7 @@ function swirl(sourceImgData, x, y, radious) {
           //converting radians to degrees
           degrees = (alpha * 180.0) / Math.PI;
 					//add a change based on the distance from the center (this is the swirl formula)
-          degrees += swirlDirection * (radious - r) * i * (effectIntensity / 20);
+          degrees += swirlDirection * (radious - r) * i * (swirlIntensity / 20);
 
           //Transform back from polar coordinates to Cartesian
           alpha = (degrees * Math.PI) / 180.0;
