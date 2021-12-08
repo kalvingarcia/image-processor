@@ -35,7 +35,7 @@ class Change {
     Add(image) { //do Add(image) when you want to save a change made by a function. When index isn't newest change, delete all changes after that
         this.list.splice(this.it);
         this.list.push(image);
-        this.it++; console.log(this.list);
+        this.it++; //console.log(this.list);
     }
     Update() { //called when you want to update canvas to this.list[this.it] (most recent change)
         let image = this.list[this.it - 1];
@@ -81,7 +81,7 @@ function shrinkToBounds() {
     else
         multi = window.screen.width * max / canvas.width;
 
-    bilinear_resize(canvas.height * multi, canvas.width * multi); console.log(canvas.height * multi, canvas.width * multi);
+    bilinear_resize(canvas.height * multi, canvas.width * multi); //console.log(canvas.height * multi, canvas.width * multi);
 }
 
 //Based on code from - https://chao-ji.github.io/jekyll/update/2018/07/19/BilinearResize.html
@@ -240,7 +240,7 @@ function onMouseOut(event) {
     if (!currentBuffer) { //if the buffer doesnt have a value exit
         return;
     }
-    if(mouse_down) {
+    else if(mouse_down) {
         validToolSet = new Set([toolID.LIQUIFY, toolID.SWIRL, toolID.BRUSH]); //this is the set of IDs of tools that use mouseOut
         if(!validToolSet.has(active_tool))
             return;
@@ -257,6 +257,9 @@ function onMouseOut(event) {
         var image = new Image(); image.src = canvas.toDataURL();
         C.Add(image);
     }
+    else {
+        drawBuffer();
+    }
 }
 
 function onMouseWheel(event) {
@@ -265,7 +268,7 @@ function onMouseWheel(event) {
     }
 
     if (event.wheelDelta) { //change in mousewheel (for chrome)
-        console.log(event.wheelDelta);
+        //console.log(event.wheelDelta);
         if (event.wheelDelta < 0) {
             toolRadious -= 1;
         }
@@ -340,8 +343,8 @@ function onMouseMove(event) {
             brushCache.y = y;
             drawBuffer();
             break;
-        default:
-            console.log("ERROR: toolID has invalid value.");
+        /*default:
+            console.log("ERROR: toolID has invalid value.");*/
         }
     } else {
         drawTool(event.clientX, event.clientY, '#000000');
@@ -355,7 +358,7 @@ function onMouseDown(event) {
     var rect = canvas.getBoundingClientRect(); //check within the bounds of the canvas
     var x = (event.clientX - rect.left) | 0;
     var y = (event.clientY - rect.top) | 0;
-    console.log(x, y); //we send a log of the clicked pixel to the console
+    //console.log(x, y); //we send a log of the clicked pixel to the console
 
 		/*
 			it might be better to do a switch here
@@ -376,6 +379,14 @@ function onMouseDown(event) {
             var picked = pick(event);
             pickedColor.style.background = picked;
             pickedColor.textContent = picked;
+            //the following code sets the text to white if the color is dark or black if the color is bright;
+            let rgb = hexToRgb(picked); //get [red, green, blue]
+            let brightness = (.89 * rgb.r + 1.77 * rgb.g + .33* rgb.b) / 765; //console.log(brightness);//get ratio of brightness (0 is dark, 1 is bright)
+            var textColor = "#FFFFFF"; //default text color is white
+            if (brightness > .5)
+                textColor = "#000000"; //if color is bright, set color to black
+                
+            document.getElementById("selected-color").style.color = textColor;
             break;
         case toolID.BRUSH:
             brushCache.x = x;
@@ -407,8 +418,8 @@ function drawTool(clientX, clientY, hovered) {
     if(!validToolSet.has(active_tool))
         return;
     var rect = canvas.getBoundingClientRect(); //checking if within canvas
-    var x = clientX - rect.left;
-    var y = clientY - rect.top;
+    var x = clientX - rect.left; //console.log(x);
+    var y = clientY - rect.top; //console.log(y);
 
     drawBuffer(); //we update the image
 
@@ -537,6 +548,11 @@ function hexToRgb(hex) {
         b: parseInt(result[3], 16)
     } : null;
 }
+
+function rgbToHex(red, green, blue) {
+    return "#" + ((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1);
+}
+
 //for color values. If a color value would go out of bounds, it instead hits a min of 0 or max of 255
 function truncate(input) {
     if(input < 0) {return 0;}
@@ -775,7 +791,8 @@ function pick(event) {
 	var pixel = context2d.getImageData(x, y, 1, 1); //we then grab a single pixel of data
   var data = pixel.data;
 
-	const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`; //we convert the data to a string
+	//const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`; //we convert the data to a string
+    const rgba = rgbToHex(data[0], data[1], data[2]);
   return rgba; //return the rgba string usable in all instances where CSS would be used (can also convert to hex)
 }
 
@@ -1044,7 +1061,7 @@ function rotate(degree) {
     var newImageData; //new canvas size depends on degree of rotation
     if(swapWH) { newImageData = context2d.createImageData(canvas.height, canvas.width); } //if degree is 90 or -90, swap width and height
     else { newImageData = context2d.createImageData(canvas.width, canvas.height); } //if degree is 180, don't swap width and height'
-    console.log(swapWH);
+    //console.log(swapWH);
     const newData = newImageData.data;
 
     for (var y = 0; y < oldImageData.height; y += 1) {

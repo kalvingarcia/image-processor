@@ -94,6 +94,21 @@ button {
   width: 1px;
 }
 
+.slider {
+    -webkit-appearance: none;
+    background: grey;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 15px; /* Set a specific slider handle width */
+    height: 15px; /* Slider handle height */
+    border-radius: 50%; 
+    background: #003823; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
 </style>
 </head>
 <body style="color:#aaaaaa;background-color:#000000">
@@ -141,11 +156,11 @@ button {
     <a>
       <div class="dropdown">
           <button class="dropbtn" id = "bButton">Presets</button>
-          <div class="dropdown-content" style="color:#aaaaaa;background-color:#000000">
-              <img src="Presets/Cat.jpg" id ="proImg4" alt="" width= "60%" style="padding: 4%">
-              <img src="Presets/earth.png" id ="proImg" alt="" width= "60%" style="padding: 4%">
-              <img src="Presets/CATT.jpg" id ="proImg3" alt="" width= "60%" style="padding: 4%">
-              <img src="Presets/monalisa.jpg" id ="proImg2" alt="" width= "60%" style="padding: 4%">  
+          <div class="dropdown-content" style="color:#aaaaaa; background-color:white; width: 150px; right: -45%; border: 1px solid white;">
+              <img src="Presets/Cat.jpg" id ="proImg4" alt="" width= "40%" style="padding: 4%">
+              <img src="Presets/earth.png" id ="proImg" alt="" width= "40%" style="padding: 4%">
+              <img src="Presets/CATT.jpg" id ="proImg3" alt="" width= "40%" style="padding: 4%">
+              <img src="Presets/monalisa.jpg" id ="proImg2" alt="" width= "40%" style="padding: 4%">  
           </div>
         </div>
     </a>
@@ -164,12 +179,12 @@ button {
     <a>
         <button onclick="toggleTool(2)">Liquify Tool</button><br>
         <label for="swiS">Liquify Intesity</label>
-        <input type="range" min="1" max="100" value="40" id = "liquifyIntensity" onchange="setLiquifyIntensity(this.value); document.getElementById('liquifyIntensity').innerHTML=this.value;" /> <br>
+        <input type="range" min="1" max="100" value="40" class = "slider" id = "liquifyIntensity" onchange="setLiquifyIntensity(this.value); document.getElementById('liquifyIntensity').innerHTML=this.value;" /> <br>
     </a>
     <a>
         <button onclick="toggleTool(1)">Swirl Tool</button><br>
         <label for="swiS">Swirl Intesity</label>
-        <input type="range" min="1" max="100" value="40" id = "swirlIntensity" onchange="setSwirlIntensity(this.value); document.getElementById('swirlIntensity').innerHTML=this.value;" /> <br>
+        <input type="range" min="1" max="100" value="40" class = "slider" id = "swirlIntensity" onchange="setSwirlIntensity(this.value); document.getElementById('swirlIntensity').innerHTML=this.value;" /> <br>
 
         <button onclick = "swirlDirection *= -1;">Toggle Swirl Direction</button>
     </a>
