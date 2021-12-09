@@ -170,9 +170,9 @@ function onloadImage(file) {
 		currentBuffer = context2d.getImageData(0, 0, img.width, img.height);
 
         shrinkToBounds();
-
+        var newImage = new Image(); newImage.src = canvas.toDataURL();
         C.Empty();
-        C.Add(img);
+        C.Add(newImage);
 	}
 }
 /*
@@ -202,12 +202,10 @@ function loadImage(src){
             currentBuffer = context2d.getImageData(0, 0, image.width, image.height);
 
             shrinkToBounds();
-
+            var newImage = new Image(); newImage.src = canvas.toDataURL();
             C.Empty();
-            C.Add(image);
-
-            //save a copy of loaded pixels
-            
+            C.Add(newImage);
+            //save a copy of loaded pixels            
         }
         image.onerror = function() {
             alert('Not a valid image.');
