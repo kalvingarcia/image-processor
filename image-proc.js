@@ -1147,7 +1147,7 @@ function toggleMenu(ID) {
   }
 }
 
-function selectPreset(imageName) { onloadImage(document.getElementById(imageName).src); }
+//function selectPreset(imageName) { onloadImage(document.getElementById(imageName).src); }
 
 /*function selectPreset() {
 
@@ -1209,10 +1209,10 @@ setLiquifyIntensity(40);
 var imgSrc = randomPreset();
 onloadImage(imgSrc);
 
-var img = document.getElementById('proImg');
+/*var img = document.getElementById('proImg');
 var img2 = document.getElementById('proImg2');
 var img3 = document.getElementById('proImg3');
-var img4 = document.getElementById('proImg4');
+var img4 = document.getElementById('proImg4');*/
 
 
 
@@ -1228,7 +1228,7 @@ if (canvas.addEventListener) {
     canvas.addEventListener('mouseup', onMouseUp, false);
 }
 
-if(img.addEventListener)  {
+/*if(img.addEventListener)  {
   img.addEventListener('click',selectPreset)
 }
 if(img2.addEventListener)  {
@@ -1239,4 +1239,4 @@ if(img3.addEventListener)  {
 }
 if(img4.addEventListener)  {
   img4.addEventListener('click',selectPreset4)
-}
+}*/
