@@ -329,12 +329,10 @@ function onMouseMove(event) {
         case toolID.NONE:
             break;
         case toolID.LIQUIFY:
-            if(liquify_time < 10) {
-                liquify(currentBuffer, x, y, toolRadious);
-                //console.log(x, y); //we send a log of the clicked pixel to the console
-                drawBuffer(); //upadte the image
-                ++liquify_time;
-            }
+            liquify(currentBuffer, x, y, toolRadious);
+            //console.log(x, y); //we send a log of the clicked pixel to the console
+            drawBuffer(); //upadte the image
+
             break;
         case toolID.BRUSH:
             brush(x, y, toolRadious);
@@ -367,7 +365,7 @@ function onMouseDown(event) {
 			we'd need to know how many tools we have for that though
 		*/
     switch(active_tool) {
-        case toolID.none:
+        case toolID.NONE:
             break;
         case toolID.SWIRL:
             swirl(currentBuffer, x, y, toolRadious);
@@ -399,7 +397,6 @@ function onMouseDown(event) {
 }
 function onMouseUp(event) {
     mouse_down = false;
-    liquify_time = 0;
     validToolSet = new Set([toolID.LIQUIFY, toolID.SWIRL, toolID.BRUSH]); //this is the set of IDs of tools that use mouseOut
     if(!validToolSet.has(active_tool))
         return;
@@ -1150,7 +1147,9 @@ function toggleMenu(ID) {
   }
 }
 
-function selectPreset() {
+function selectPreset(imageName) { onloadImage(document.getElementById(imageName).src); }
+
+/*function selectPreset() {
 
   var imgSrc = document.getElementById('proImg').src  
   onloadImage(imgSrc);
@@ -1172,7 +1171,7 @@ function selectPreset4() {
 
   var imgSrc = document.getElementById('proImg4').src  
   onloadImage(imgSrc);
-}
+}*/
 
 let C = new Change();
 
@@ -1191,7 +1190,6 @@ var currentBuffer;
 var canvas = document.getElementById(canvasId); //we are just grabbing canvas based on ID
 var context2d = canvas.getContext('2d'); //grabbing the context
 var mouse_down = false; //this is a bool for dragging!
-var liquify_time = 0; //this is a count for dragging liquify, essentially a timer
 var brushCache = new BrushCache();
 var flip = 0;
 
