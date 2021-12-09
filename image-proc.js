@@ -263,7 +263,7 @@ function onMouseOut(event) {
 }
 
 function onMouseWheel(event) {
-    if (!currentBuffer) { //no value, exit
+    if (!currentBuffer || mouse_down) { //if currentBuffer has no value or mouse is down (like if we are drawing) do nothing
         return;
     }
 
@@ -284,6 +284,14 @@ function onMouseWheel(event) {
     }
 
 		//checking the tool bounds
+    toolRadInBounds();
+
+
+		//we have to draw the tool on the canvas
+    drawTool(event.clientX, event.clientY);
+}
+
+function toolRadInBounds() {
     if(active_tool == toolID.BRUSH && active_brush == brushSet.PENCIL) {
       if (toolRadious < MIN_PENCIL_RADIOUS) {
           toolRadious = MIN_PENCIL_RADIOUS;
@@ -306,11 +314,8 @@ function onMouseWheel(event) {
           toolRadious = MAX_TOOL_RADIOUS;
       }
     }
-
-
-		//we have to draw the tool on the canvas
-    drawTool(event.clientX, event.clientY);
 }
+
 function onMouseMove(event) {
     if (!currentBuffer) { //no value, exit
         return;
@@ -411,24 +416,39 @@ function onMouseUp(event) {
 	there may be a more efficient way to handle this drawing part though
 */
 function drawTool(clientX, clientY, hovered) {
-    validToolSet = new Set([toolID.LIQUIFY, toolID.SWIRL, toolID.PICK, toolID.BRUSH] ); //this is the set of IDs that will draw a circle on the mouse pointer
-    if(!validToolSet.has(active_tool))
-        return;
     var rect = canvas.getBoundingClientRect(); //checking if within canvas
     var x = clientX - rect.left; //console.log(x);
     var y = clientY - rect.top; //console.log(y);
 
     drawBuffer(); //we update the image
 
-    if(active_tool != toolID.PICK) { //if we are not color picking
-	    //we draw a circle centered on the mouse
-	    context2d.beginPath();
-      context2d.arc(x, y, toolRadious, 0, 2 * Math.PI, false);
-      context2d.lineWidth = 1;
-      context2d.strokeStyle = '#0000fa';
-      context2d.closePath();
-      context2d.stroke();
-    } else { //if we are color picking
+    if(active_tool == toolID.BRUSH) { //draw for brush
+        if(active_brush == brushSet.PENCIL || active_brush == brushSet.MARKER) {
+	        context2d.beginPath();
+            context2d.arc(x, y, toolRadious, 0, 2 * Math.PI, false);
+            context2d.lineWidth = 1;
+            context2d.strokeStyle = '#0000fa';
+            context2d.closePath();
+            context2d.stroke();
+        }
+        else if(active_brush == brushSet.PEN) {
+        
+            context2d.beginPath();
+            context2d.moveTo(x + toolRadious, y + toolRadious);
+            context2d.strokeStyle = '#0000fa';
+            context2d.lineWidth = 1;
+            context2d.lineTo(x - toolRadious, y - toolRadious);
+            context2d.stroke();
+        }
+        else if(active_brush == brushSet.PEARL || active_brush == brushSet.HATCH) {
+            context2d.beginPath();
+            context2d.arc(x, y, 3, 0, 2 * Math.PI, false);
+            context2d.lineWidth = 1;
+            context2d.strokeStyle = '#0000fa';
+            context2d.closePath();
+            context2d.stroke();
+        }
+    } else if (active_tool == toolID.PICK){ //if we are color picking
 			//we draw an offset circle with a larger stroke and filled with the color hovered
 	    context2d.beginPath();
         context2d.arc(x + 20, y - 20, 20, 0, 2 * Math.PI, false);
@@ -437,6 +457,13 @@ function drawTool(clientX, clientY, hovered) {
 	    context2d.fillStyle = hovered;
         context2d.closePath();
 	    context2d.fill();
+        context2d.stroke();
+    } else if(active_tool == toolID.SWIRL || active_tool == toolID.LIQUIFY){ //other tool which is allowed (swirld or liquify)
+        context2d.beginPath();
+        context2d.arc(x, y, toolRadious, 0, 2 * Math.PI, false);
+        context2d.lineWidth = 1;
+        context2d.strokeStyle = '#0000fa';
+        context2d.closePath();
         context2d.stroke();
     }
 }
@@ -812,16 +839,17 @@ function colorFilter() {
 
 function brush(x, y, radious) {
     //this function just switches between the brush aux functions
+    //console.log(active_brush);
     var color = hexToRgb(document.getElementById('bColor').value);
     switch(active_brush) {
       case brushSet.MARKER:
-        var opacity = parseInt(document.getElementById('opB').value) / 100;
+        var opacity = parseInt(document.getElementById('opB').value) / 250.0; //100% opacity is 25% alpha
         break;
       case brushSet.PEARL:
         var opacity = parseInt(document.getElementById('opC').value) / 100;
         break;
       case brushSet.HATCH:
-        var opacity = parseInt(document.getElementById('opD').value) / 100;
+        var opacity = parseInt(document.getElementById('opD').value) / 250.0; //100% opacity is 10% alpha
         break;
       default:
         var opacity = 1;
@@ -837,18 +865,12 @@ function brush(x, y, radious) {
     case brushSet.PEARL:
         pearl(x, y, strokeStyle);
         break;
-    //case brushSet.WIGGLE:
-        //wiggle(x, y);
-        //break;
     case brushSet.PEN:
         pen(x, y, radious, strokeStyle);
         break;
     case brushSet.HATCH:
         hatching(x, y, strokeStyle);
         break;
-    //case brushSet.SPRAY:
-        //spray(x, y);
-        //break;
     default:
         console.log("ERROR: brushSet has invalid value.")
     }
@@ -862,32 +884,35 @@ function pencil(x, y, radious, style) {
     context2d.beginPath();
     context2d.moveTo(brushCache.x, brushCache.y);
     context2d.strokeStyle = style; //i want the color to match the pickedColor essentially
-    context2d.lineWidth = radious; //this is the tool's radious
+    context2d.lineWidth = 2 * radious; //this is the tool's diameter
     context2d.lineCap = "round";
     context2d.lineJoin = "round";
     context2d.lineTo(x, y);
     context2d.stroke();
 }
+
 function marker(x, y, radious, style) {
   //drawing the circles
-  context2d.beginPath();
-  context2d.arc(x, y, radious, 0, 2 * Math.PI, false); //draw circles on the mouse
-  context2d.fillStyle = style; //i want the color to match the pickedColor essentially
-  context2d.closePath();
-  context2d.fill();
+    context2d.beginPath();
+    context2d.arc(x, y, radious, 0, 2 * Math.PI, false); //draw circles on the mouse
+    context2d.fillStyle = style; //i want the color to match the pickedColor essentially
+    context2d.closePath();
+    context2d.fill();
 }
-function pearl(x, y, style) {
-  distance = Math.sqrt(Math.pow(x - brushCache.x, 2) + Math.pow(y - brushCache.y, 2));
-  midX = (x + brushCache.x) / 2;
-  midY = (y + brushCache.y) / 2;
 
-  //drawing the cirlces
-  context2d.beginPath();
-  context2d.arc(midX, midY, distance, 0, 2 * Math.PI, false); //draw circles in the mid point of currPos and prevPos
-  context2d.fillStyle = style; //i want the color to match the pickedColor essentially
-  context2d.closePath();
-  context2d.fill();
+function pearl(x, y, style) {
+    distance = Math.sqrt(Math.pow(x - brushCache.x, 2) + Math.pow(y - brushCache.y, 2));
+    midX = (x + brushCache.x) / 2;
+    midY = (y + brushCache.y) / 2;
+
+    //drawing the cirlces
+    context2d.beginPath();
+    context2d.arc(midX, midY, distance, 0, 2 * Math.PI, false); //draw circles in the mid point of currPos and prevPos
+    context2d.fillStyle = style; //i want the color to match the pickedColor essentially
+    context2d.closePath();
+    context2d.fill();
 }
+
 function pen(x, y, radious, style) {
   const lerps = 16; //lerps are linear interpolations, so this is the amount of them we are doing
 
@@ -905,6 +930,7 @@ function pen(x, y, radious, style) {
     context2d.stroke();
   }
 }
+
 function hatching(x, y, style) {
   let speed = Math.abs(x - brushCache.x) + Math.abs(y - brushCache.y); //the speed determines the size
 
@@ -1050,6 +1076,7 @@ function flipI(direction) {
     var image = new Image(); image.src = canvas.toDataURL();
     C.Add(image);
 }
+
 function rotate(degree) {
     var swapWH = (degree != 180); //if degree is 180, don't swap, otherwise, swap height and width
     var oldImageData = context2d.getImageData(0, 0, canvas.width, canvas.height);
@@ -1109,69 +1136,44 @@ function randomPreset() {
 }
 
 function toggleMenu(ID) {
-  var markermenu = document.getElementById("markermenu");
-  var pearlmenu = document.getElementById("pearlmenu");
-  var hatchmenu = document.getElementById("hatchmenu");
-  switch (ID) {
-    case brushSet.MARKER:
-      if (markermenu.style.display == "none") {
-        markermenu.style.display = "block";
-        pearlmenu.style.display = "none";
-        hatchmenu.style.display = "none";
-      } else {
-        markermenu.style.display = "none";
-      }
-      break;
-    case brushSet.PEARL:
-      if (pearlmenu.style.display == "none") {
-        pearlmenu.style.display = "block";
-        markermenu.style.display = "none";
-        hatchmenu.style.display = "none";
-      } else {
-        pearlmenu.style.display = "none";
-      }
-      break;
-    case brushSet.HATCH:
-      if (hatchmenu.style.display == "none") {
-        hatchmenu.style.display = "block";
-        pearlmenu.style.display = "none";
-        markermenu.style.display = "none";
-      } else {
-        hatchmenu.style.display = "none";
-      }
-      break;
-    default:
-      hatchmenu.style.display = "none";
-      pearlmenu.style.display = "none";
-      markermenu.style.display = "none";
-  }
+    toolRadInBounds();
+    var markermenu = document.getElementById("markermenu");
+    var pearlmenu = document.getElementById("pearlmenu");
+    var hatchmenu = document.getElementById("hatchmenu");
+    switch (ID) {
+        case brushSet.MARKER:
+            if (markermenu.style.display == "none") {
+                markermenu.style.display = "block";
+                pearlmenu.style.display = "none";
+                hatchmenu.style.display = "none";
+                } else {
+                    markermenu.style.display = "none";
+                }
+            break;
+        case brushSet.PEARL:
+            if (pearlmenu.style.display == "none") {
+                pearlmenu.style.display = "block";
+                markermenu.style.display = "none";
+                hatchmenu.style.display = "none";
+            } else {
+                pearlmenu.style.display = "none";
+            }
+            break;
+        case brushSet.HATCH:
+            if (hatchmenu.style.display == "none") {
+                hatchmenu.style.display = "block";
+                pearlmenu.style.display = "none";
+                markermenu.style.display = "none";
+            } else {
+                hatchmenu.style.display = "none";
+            }
+            break;
+        default:
+            hatchmenu.style.display = "none";
+            pearlmenu.style.display = "none";
+            markermenu.style.display = "none";
+    }
 }
-
-//function selectPreset(imageName) { onloadImage(document.getElementById(imageName).src); }
-
-/*function selectPreset() {
-
-  var imgSrc = document.getElementById('proImg').src  
-  onloadImage(imgSrc);
-}
-
-function selectPreset2() {
-
-  var imgSrc = document.getElementById('proImg2').src  
-  onloadImage(imgSrc);
-}
-
-function selectPreset3() {
-
-  var imgSrc = document.getElementById('proImg3').src  
-  onloadImage(imgSrc);
-}
-
-function selectPreset4() {
-
-  var imgSrc = document.getElementById('proImg4').src  
-  onloadImage(imgSrc);
-}*/
 
 let C = new Change();
 
@@ -1209,13 +1211,6 @@ setLiquifyIntensity(40);
 var imgSrc = randomPreset();
 onloadImage(imgSrc);
 
-/*var img = document.getElementById('proImg');
-var img2 = document.getElementById('proImg2');
-var img3 = document.getElementById('proImg3');
-var img4 = document.getElementById('proImg4');*/
-
-
-
 /*
 	This is the event listener that calls the functions for events
 */
@@ -1227,16 +1222,3 @@ if (canvas.addEventListener) {
     canvas.addEventListener('mousedown', onMouseDown, false);
     canvas.addEventListener('mouseup', onMouseUp, false);
 }
-
-/*if(img.addEventListener)  {
-  img.addEventListener('click',selectPreset)
-}
-if(img2.addEventListener)  {
-  img2.addEventListener('click',selectPreset2)
-}
-if(img3.addEventListener)  {
-  img3.addEventListener('click',selectPreset3)
-}
-if(img4.addEventListener)  {
-  img4.addEventListener('click',selectPreset4)
-}*/
